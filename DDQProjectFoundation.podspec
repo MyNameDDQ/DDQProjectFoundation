@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
   s.license      = "MIT"
   s.author       = { "DDQ" => "869795924@qq.com" }
   s.source       = { :git => "https://github.com/MyNameDDQ/DDQProjectFoundation.git", :tag => s.version }
-  s.source_files = "DDQProjectFoundation"
+  s.source_files = "DDQProjectFoundation/*.{h,m}"
   s.requires_arc = true
   s.dependency 'AFNetworking'
   s.dependency 'SDWebImage'
