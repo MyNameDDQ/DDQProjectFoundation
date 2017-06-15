@@ -10,8 +10,6 @@
 
 @interface DDQFoundationController ()
 
-@property (nonatomic, strong) UILabel *controllerTitleLabel;
-
 @end
 
 @implementation DDQFoundationController
@@ -64,9 +62,6 @@ ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttr
 
 - (UIButton *)setLeftBarButtonItemStyle:(DDQFoundationBarButtonStyle)style Content:(id)content {
     
-    //类型判断
-    if (![content isMemberOfClass:[NSString class]] || ![content isMemberOfClass:[UIImage class]]) return nil;
-    
     UIBarButtonItem *leftItem = nil;
     UIButton *customButton = [UIButton buttonWithType:UIButtonTypeCustom];
     //内容类型判断
@@ -82,16 +77,16 @@ ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttr
     
     //设置leftItem
     NSMutableArray *itemArray = self.navigationItem.leftBarButtonItems.mutableCopy;
+    if (!itemArray) {
+        itemArray = [NSMutableArray array];
+    }
     [itemArray addObject:leftItem];
-    self.navigationItem.leftBarButtonItems = itemArray.copy;
+    [self.navigationItem setLeftBarButtonItems:itemArray.copy animated:YES];
     
     return customButton;
 }
 
 - (UIButton *)setRightBarButtonItemStyle:(DDQFoundationBarButtonStyle)style Content:(id)content {
-    
-    //类型判断
-    if (![content isMemberOfClass:[NSString class]] || ![content isMemberOfClass:[UIImage class]]) return nil;
     
     UIBarButtonItem *rightItem = nil;
     UIButton *customButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -108,8 +103,11 @@ ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttr
     
     //设置leftItem
     NSMutableArray *itemArray = self.navigationItem.rightBarButtonItems.mutableCopy;
+    if (!itemArray) {
+        itemArray = [NSMutableArray array];
+    }
     [itemArray addObject:rightItem];
-    self.navigationItem.rightBarButtonItems = itemArray.copy;
+    [self.navigationItem setRightBarButtonItems:itemArray.copy animated:YES];
     
     return customButton;
 }
@@ -311,10 +309,41 @@ ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttr
     [self.mj_footer endRefreshingWithNoMoreData];
 }
 
-- (void)EndRestNorMoreData {
+- (void)EndRestNoMoreData {
 
     [self.mj_footer resetNoMoreData];
 }
+@end
 
+@implementation MBProgressHUD (DDQFoundationHUDShowHandle)
+
++ (void)alertHUDInView:(UIView *)view Text:(NSString *)text {
+
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
+    hud.label.text = text;
+    hud.mode = MBProgressHUDModeText;
+    hud.removeFromSuperViewOnHide = YES;
+    [hud hideAnimated:YES afterDelay:1.0];
+}
+
++ (void)alertHUDInView:(UIView *)view Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate {
+
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
+    hud.label.text = text;
+    hud.mode = MBProgressHUDModeText;
+    hud.delegate = delegate;
+    hud.removeFromSuperViewOnHide = YES;
+    [hud hideAnimated:YES afterDelay:1.0];
+}
+
++ (instancetype)alertHUDInView:(UIView *)view Mode:(MBProgressHUDMode)mode Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate {
+
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
+    hud.mode = mode;
+    hud.label.text = text;
+    hud.delegate = delegate;
+    hud.removeFromSuperViewOnHide = YES;
+    return hud;
+}
 
 @end

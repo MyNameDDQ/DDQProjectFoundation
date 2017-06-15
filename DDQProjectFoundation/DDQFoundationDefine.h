@@ -17,4 +17,10 @@
 #define kSetImage(name) [UIImage imageNamed:name]
 #define kFindNib(class) [UINib nibWithNibName:NSStringFromClass(class) bundle:[NSBundle mainBundle]]
 
+#ifdef DEBUG
+    #define DDQLog(...) NSLog(@"%s 第%d行 \n %@\n\n",__func__,__LINE__,[NSString stringWithFormat:__VA_ARGS__])
+#else
+    #define DDQLog(...)
+#endif
+
 #endif /* DDQFoundationDefine_h */

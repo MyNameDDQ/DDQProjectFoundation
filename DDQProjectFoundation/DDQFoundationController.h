@@ -112,16 +112,22 @@ typedef NS_ENUM(NSUInteger, DDQFoundationFooterStyle) {
  @return 如果需要，自己设置这个Footer
  */
 - (MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void(^)())handle;
-
 @end
 
 @interface UIScrollView (DDQFoundationFreshStateHandle)
 
 - (void)EndRefreshing;
 - (void)EndNoMoreData;
-- (void)EndRestNorMoreData;
+- (void)EndRestNoMoreData;
 @end
 
+@interface MBProgressHUD (DDQFoundationHUDShowHandle)
+
++ (void)alertHUDInView:(UIView *)view Text:(NSString *)text;
++ (void)alertHUDInView:(UIView *)view Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate;
++ (instancetype)alertHUDInView:(UIView *)view Mode:(MBProgressHUDMode)mode Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate;
+
+@end
 
 FOUNDATION_EXTERN RequestFailureKey const RequestFailureDescKey;//网络请求错误后的错误描述
 FOUNDATION_EXTERN ControllerNavBarContentKey const ControllerNavBarTitleKey;//navgationBar，标题

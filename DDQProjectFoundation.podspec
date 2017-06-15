@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "DDQProjectFoundation"
-  s.version      = "1.0.1"
+  s.version      = "1.0.2"
   s.ios.deployment_target = '7.0'
   s.summary      = "Easy Inherit"
   s.homepage     = "https://github.com/MyNameDDQ/DDQProjectFoundation"
