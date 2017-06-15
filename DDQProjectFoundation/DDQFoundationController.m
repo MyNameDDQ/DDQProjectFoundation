@@ -1,14 +1,12 @@
 //
 //  DDQFoundationController.m
-//  TimeSpace
 //
-//  Created by 123 on 2017/5/25.
-//  Copyright © 2017年 WICEP. All rights reserved.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
 
 #import "DDQFoundationController.h"
 
 #import <AFNetworking/AFNetworking.h>
+#import <MJRefresh/MJRefresh.h>
 
 @interface DDQFoundationController ()
 
@@ -37,6 +35,7 @@ ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttr
 
 - (void)setFoundationNavAttrs:(NSDictionary<ControllerNavBarContentKey,id> *)foundationNavAttrs {
     
+    NSAssert([foundationNavAttrs isKindOfClass:[NSDictionary class]], @"设置控制器的Nav需要是个字典");
     self.navigationItem.title = foundationNavAttrs[ControllerNavBarTitleKey];
     [self.navigationController.navigationBar setTitleTextAttributes:foundationNavAttrs[ControllerNavBarAttrsKey]];
 }
@@ -56,7 +55,10 @@ ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttr
         [self.view addSubview:_foundationDefaultHUD];
     }
     
-    [self.view bringSubviewToFront:_foundationDefaultHUD];
+    //层级判断
+    if (self.view.subviews.lastObject != _foundationDefaultHUD) {//最上层的不是hud，就把他移到最上层
+        [self.view bringSubviewToFront:_foundationDefaultHUD];
+    }
     return _foundationDefaultHUD;
 }
 
@@ -214,5 +216,105 @@ ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttr
         }
     }];
 }
+
+- (MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void (^)())handle {
+
+    Class headerClass;
+    switch (style) {
+            
+        case DDQFoundationHeaderStyleNormal:{
+            headerClass = [MJRefreshNormalHeader class];
+        }break;
+           
+        case DDQFoundationHeaderStyleGif:{
+            headerClass = [MJRefreshGifHeader class];
+        }break;
+            
+        case DDQFoundationHeaderStyleState:{
+            headerClass = [MJRefreshStateHeader class];
+        }break;
+            
+        default:
+            break;
+    }
+    scrollView.mj_header = [headerClass headerWithRefreshingBlock:^{
+
+        if (handle) {
+            handle();
+        }
+    }];
+    return scrollView.mj_header;
+}
+
+- (MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void (^)())handle {
+
+    Class footerClass;
+    switch (style) {
+            
+        case DDQFoundationFooterStyleAutoGif:{
+            footerClass = [MJRefreshAutoGifFooter class];
+        }break;
+            
+        case DDQFoundationFooterStyleAutoState:{
+            footerClass = [MJRefreshAutoStateFooter class];
+        }break;
+            
+        case DDQFoundationFooterStyleAutoNormal:{
+            footerClass = [MJRefreshAutoNormalFooter class];
+        }break;
+            
+        case DDQFoundationFooterStyleBackGif:{
+            footerClass = [MJRefreshBackGifFooter class];
+        }break;
+            
+        case DDQFoundationFooterStyleBackState:{
+            footerClass = [MJRefreshBackStateFooter class];
+        }break;
+            
+        case DDQFoundationFooterStyleBackNormal:{
+            footerClass = [MJRefreshBackNormalFooter class];
+        }break;
+            
+        default:
+            break;
+    }
+    scrollView.mj_footer = [footerClass footerWithRefreshingBlock:^{
+        
+        if (handle) {
+            handle();
+        }
+    }];
+    return scrollView.mj_footer;
+}
+
+@end
+
+@implementation UIScrollView (DDQFoundationFreshStateHandle)
+
+- (void)EndRefreshing {
+
+    //头视图判断
+    if (self.mj_header.state == MJRefreshStateRefreshing) {//头视图如果在刷新就暂停
+        
+        [self.mj_header endRefreshing];
+    }
+    
+    //脚视图判断
+    if (self.mj_footer.state == MJRefreshStateRefreshing) {//脚视图如果在刷新就暂停
+        
+        [self.mj_footer endRefreshing];
+    }
+}
+
+- (void)EndNoMoreData {
+
+    [self.mj_footer endRefreshingWithNoMoreData];
+}
+
+- (void)EndRestNorMoreData {
+
+    [self.mj_footer resetNoMoreData];
+}
+
 
 @end

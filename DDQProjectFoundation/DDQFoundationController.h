@@ -1,10 +1,7 @@
 //
 //  DDQFoundationController.h
-//  TimeSpace
 //
-//  Created by 123 on 2017/5/25.
-//  Copyright © 2017年 WICEP. All rights reserved.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
 
 #import <UIKit/UIKit.h>
 
@@ -19,8 +16,27 @@ typedef NS_ENUM(NSUInteger, DDQFoundationBarButtonStyle) {
     
     DDQFoundationBarButtonText = 107038,
     DDQFoundationBarButtonImage,
-    
 };
+
+typedef NS_ENUM(NSUInteger, DDQFoundationHeaderStyle) {
+    
+    DDQFoundationHeaderStyleNormal,
+    DDQFoundationHeaderStyleGif,
+    DDQFoundationHeaderStyleState,
+};
+
+typedef NS_ENUM(NSUInteger, DDQFoundationFooterStyle) {
+    
+    DDQFoundationFooterStyleAutoNormal,
+    DDQFoundationFooterStyleAutoGif,
+    DDQFoundationFooterStyleAutoState,
+    DDQFoundationFooterStyleBackNormal,
+    DDQFoundationFooterStyleBackGif,
+    DDQFoundationFooterStyleBackState,
+};
+
+@class MJRefreshHeader;
+@class MJRefreshFooter;
 
 @interface DDQFoundationController : UIViewController
 
@@ -77,7 +93,35 @@ typedef NS_ENUM(NSUInteger, DDQFoundationBarButtonStyle) {
  */
 - (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,id> *)param Success:(void (^)(id))success Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> *))failure;
 
+/**
+ 设置Header
+ 
+ @param scrollView 被设置的view
+ @param style header的类型
+ @param handle 下拉的回调
+ @return 如果需要，自己设置这个Header
+ */
+- (MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void(^)())handle;
+
+/**
+ 设置Footer
+
+ @param scrollView 被设置的view
+ @param style footer的类型
+ @param handle 上拉的回调
+ @return 如果需要，自己设置这个Footer
+ */
+- (MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void(^)())handle;
+
 @end
+
+@interface UIScrollView (DDQFoundationFreshStateHandle)
+
+- (void)EndRefreshing;
+- (void)EndNoMoreData;
+- (void)EndRestNorMoreData;
+@end
+
 
 FOUNDATION_EXTERN RequestFailureKey const RequestFailureDescKey;//网络请求错误后的错误描述
 FOUNDATION_EXTERN ControllerNavBarContentKey const ControllerNavBarTitleKey;//navgationBar，标题

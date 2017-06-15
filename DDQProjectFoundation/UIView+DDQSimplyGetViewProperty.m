@@ -1,10 +1,7 @@
 //
 //  UIView+DDQSimplyGetViewProperty.m
-//  TimeSpace
 //
-//  Created by 123 on 2017/5/26.
-//  Copyright © 2017年 WICEP. All rights reserved.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
 
 #import "UIView+DDQSimplyGetViewProperty.h"
 
