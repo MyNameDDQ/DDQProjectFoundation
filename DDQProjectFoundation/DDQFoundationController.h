@@ -7,15 +7,15 @@
 
 #import "DDQFoundationHeader.h"
 
-typedef NSString * ControllerSourceKey;//数据源标识
-typedef NSString * ControllerCellIdentifier;//cell的id标识
-typedef NSString * RequestFailureKey;//访问错误的描述
+typedef NSString * ControllerSourceKey;       //数据源标识
+typedef NSString * ControllerCellIdentifier;  //cell的id标识
+typedef NSString * RequestFailureKey;         //访问错误的描述
 typedef NSString * ControllerNavBarContentKey;//控制器bar内容
 
 typedef NS_ENUM(NSUInteger, DDQFoundationBarButtonStyle) {
     
-    DDQFoundationBarButtonText = 107038,
-    DDQFoundationBarButtonImage,
+    DDQFoundationBarButtonText = 107038,//显示文字
+    DDQFoundationBarButtonImage,        //显示图片
 };
 
 typedef NS_ENUM(NSUInteger, DDQFoundationHeaderStyle) {
@@ -41,9 +41,30 @@ typedef NS_ENUM(NSUInteger, DDQFoundationFooterStyle) {
 @interface DDQFoundationController : UIViewController
 
 /**
- NavgationBar的backgroundImage
+ 初始化方法
+
+ @return 本类的实例
  */
-@property (nonatomic, copy) UIImage *foundationNavBarImage;
++ (instancetype)foundationController;
+
+/**
+ 基础url
+ */
+@property (nonatomic, readonly) NSString *foundationBaseURL;
+
+/**
+ 设置基础URL
+
+ @param url 基础的url
+ */
+- (void)foundation_setBaseURL:(NSString *)url;
+
+/**
+ 设置barImageName
+
+ @param name imageName
+ */
+- (void)foundation_setNavigationBarBackgroundImageName:(NSString *)name;
 
 /**
  控制器名称
@@ -129,6 +150,6 @@ typedef NS_ENUM(NSUInteger, DDQFoundationFooterStyle) {
 
 @end
 
-FOUNDATION_EXTERN RequestFailureKey const RequestFailureDescKey;//网络请求错误后的错误描述
-FOUNDATION_EXTERN ControllerNavBarContentKey const ControllerNavBarTitleKey;//navgationBar，标题
-FOUNDATION_EXTERN ControllerNavBarContentKey const ControllerNavBarAttrsKey;//navgaitonBar，标题富文本
+UIKIT_EXTERN RequestFailureKey const RequestFailureDescKey;            //网络请求错误后的错误描述
+UIKIT_EXTERN ControllerNavBarContentKey const ControllerNavBarTitleKey;//navgationBar，标题
+UIKIT_EXTERN ControllerNavBarContentKey const ControllerNavBarAttrsKey;//navgaitonBar，标题富文本

@@ -18,6 +18,9 @@
 #import <Masonry/Masonry.h>
 #import <MJExtension/MJExtension.h>
 #import <MBProgressHUD/MBProgressHUD.h>
+#import <SDWebImage/SDWebImageDownloader.h>
+#import <SDWebImage/UIImageView+WebCache.h>
+
 
 //工程文件
 #import "UIView+DDQSimplyGetViewProperty.h"

@@ -8,7 +8,10 @@
 #import <AFNetworking/AFNetworking.h>
 #import <MJRefresh/MJRefresh.h>
 
-@interface DDQFoundationController ()
+@interface DDQFoundationController (){
+
+    NSString *_navBarBackgroundImageName;
+}
 
 @end
 
@@ -17,6 +20,16 @@
 RequestFailureKey const RequestFailureDescKey = @"com.ddq.errorDesc";
 ControllerNavBarContentKey const ControllerNavBarTitleKey = @"com.ddq.navBarTitle";
 ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttrs";
+
+static NSString *DDQFoundationArchiverURLPath = nil;
+static NSString *DDQFoundationArchiverNavBGImagePath = nil;
+
++ (void)load {
+
+    NSString *cachePath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
+    DDQFoundationArchiverURLPath = [cachePath stringByAppendingPathComponent:@"DDQBaseURL"];
+    DDQFoundationArchiverNavBGImagePath = [cachePath stringByAppendingPathComponent:@"DDQNavBGName"];
+}
 
 - (void)viewDidLoad {
     
@@ -28,19 +41,36 @@ ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttr
     
     //navbar的设置
     self.navigationController.navigationBar.translucent = NO;
-    [self.navigationController.navigationBar setBackgroundImage:kSetImage(@"nav_barImage") forBarMetrics:UIBarMetricsDefault];
+    _navBarBackgroundImageName = [NSKeyedUnarchiver unarchiveObjectWithFile:DDQFoundationArchiverNavBGImagePath];
+    [self.navigationController.navigationBar setBackgroundImage:kSetImage(_navBarBackgroundImageName) forBarMetrics:UIBarMetricsDefault];
+}
+
+#pragma mark - Base Method
++ (instancetype)foundationController {
+    
+    return [[self alloc] init];
 }
 
 - (void)setFoundationNavAttrs:(NSDictionary<ControllerNavBarContentKey,id> *)foundationNavAttrs {
     
-    NSAssert([foundationNavAttrs isKindOfClass:[NSDictionary class]], @"设置控制器的Nav需要是个字典");
+    _foundationNavAttrs = foundationNavAttrs;
     self.navigationItem.title = foundationNavAttrs[ControllerNavBarTitleKey];
     [self.navigationController.navigationBar setTitleTextAttributes:foundationNavAttrs[ControllerNavBarAttrsKey]];
 }
 
-- (void)setFoundationNavBarImage:(UIImage *)foundationNavBarImage {
-    
-    [self.navigationController.navigationBar setBackgroundImage:foundationNavBarImage forBarMetrics:UIBarMetricsDefault];
+- (void)foundation_setBaseURL:(NSString *)url {
+
+    [NSKeyedArchiver archiveRootObject:url toFile:DDQFoundationArchiverURLPath];
+}
+
+- (NSString *)foundationBaseURL {
+
+    return [NSKeyedUnarchiver unarchiveObjectWithFile:DDQFoundationArchiverURLPath];
+}
+
+- (void)foundation_setNavigationBarBackgroundImageName:(NSString *)name {
+
+    [NSKeyedArchiver archiveRootObject:name toFile:DDQFoundationArchiverNavBGImagePath];
 }
 
 - (MBProgressHUD *)foundationDefaultHUD {
