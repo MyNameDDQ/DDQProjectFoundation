@@ -7,6 +7,7 @@
 
 #import "DDQFoundationHeader.h"
 
+NS_ASSUME_NONNULL_BEGIN
 typedef NSString * ControllerSourceKey;       //数据源标识
 typedef NSString * ControllerCellIdentifier;  //cell的id标识
 typedef NSString * RequestFailureKey;         //访问错误的描述
@@ -102,7 +103,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationFooterStyle) {
  @param success 请求成功
  @param failure 请求失败
  */
-- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *, id> *)param Success:(void(^)(id result))success Failure:(void(^)(NSDictionary<RequestFailureKey, NSString *> *errDic))failure;
+- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *, NSString *> *)param Success:(void(^)(id _Nullable result))success Failure:(void(^)(NSDictionary<RequestFailureKey, NSString *> *errDic))failure;
 
 /**
  基础请求:POST
@@ -112,7 +113,19 @@ typedef NS_ENUM(NSUInteger, DDQFoundationFooterStyle) {
  @param success 请求成功
  @param failure 请求失败
  */
-- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,id> *)param Success:(void (^)(id))success Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> *))failure;
+- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *, NSString *> *)param Success:(void (^)(id _Nullable result))success Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> *errDic))failure;
+
+/**
+ 基础请求:上传图片
+
+ @param url 访问地址
+ @param param 访问参数
+ @param images 图片数据(图片名为字典的key)
+ @param success 上传成功
+ @param progress 上传进度
+ @param failure 上传失败
+ */
+- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *, NSString *> *)param Images:(NSDictionary<NSString *, UIImage *> *)images Success:(void (^)(id _Nullable result))success Progress:(void (^)(NSProgress *progress))progress Failure:(void(^)(NSDictionary<RequestFailureKey, NSString *> *errDic))failure;
 
 /**
  设置Header
@@ -122,7 +135,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationFooterStyle) {
  @param handle 下拉的回调
  @return 如果需要，自己设置这个Header
  */
-- (MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void(^)())handle;
+- (__kindof MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void(^)())handle;
 
 /**
  设置Footer
@@ -132,24 +145,26 @@ typedef NS_ENUM(NSUInteger, DDQFoundationFooterStyle) {
  @param handle 上拉的回调
  @return 如果需要，自己设置这个Footer
  */
-- (MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void(^)())handle;
+- (__kindof MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void(^)())handle;
 @end
 
 @interface UIScrollView (DDQFoundationFreshStateHandle)
 
-- (void)EndRefreshing;
-- (void)EndNoMoreData;
-- (void)EndRestNoMoreData;
+- (void)foundation_endRefreshing;
+- (void)foundation_endNoMoreData;
+- (void)foundation_endRestNoMoreData;
 @end
 
 @interface MBProgressHUD (DDQFoundationHUDShowHandle)
 
 + (void)alertHUDInView:(UIView *)view Text:(NSString *)text;
-+ (void)alertHUDInView:(UIView *)view Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate;
-+ (instancetype)alertHUDInView:(UIView *)view Mode:(MBProgressHUDMode)mode Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate;
++ (void)alertHUDInView:(UIView *)view Text:(NSString *)text Delegate:(nullable id<MBProgressHUDDelegate>)delegate;
++ (instancetype)alertHUDInView:(UIView *)view Mode:(MBProgressHUDMode)mode Text:(NSString *)text Delegate:(nullable id<MBProgressHUDDelegate>)delegate;
 
 @end
 
 UIKIT_EXTERN RequestFailureKey const RequestFailureDescKey;            //网络请求错误后的错误描述
 UIKIT_EXTERN ControllerNavBarContentKey const ControllerNavBarTitleKey;//navgationBar，标题
 UIKIT_EXTERN ControllerNavBarContentKey const ControllerNavBarAttrsKey;//navgaitonBar，标题富文本
+NS_ASSUME_NONNULL_END
+

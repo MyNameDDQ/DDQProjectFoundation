@@ -37,11 +37,11 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
     
     //view的一些设置
     [self setAutomaticallyAdjustsScrollViewInsets:NO];
-    self.view.backgroundColor = [UIColor clearColor];
     
     //navbar的设置
     self.navigationController.navigationBar.translucent = NO;
     _navBarBackgroundImageName = [NSKeyedUnarchiver unarchiveObjectWithFile:DDQFoundationArchiverNavBGImagePath];
+    self.navigationController.navigationBar.shadowImage = [UIImage new];
     [self.navigationController.navigationBar setBackgroundImage:kSetImage(_navBarBackgroundImageName) forBarMetrics:UIBarMetricsDefault];
 }
 
@@ -54,8 +54,15 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
 - (void)setFoundationNavAttrs:(NSDictionary<ControllerNavBarContentKey,id> *)foundationNavAttrs {
     
     _foundationNavAttrs = foundationNavAttrs;
-    self.navigationItem.title = foundationNavAttrs[ControllerNavBarTitleKey];
-    [self.navigationController.navigationBar setTitleTextAttributes:foundationNavAttrs[ControllerNavBarAttrsKey]];
+    //标题有值
+    if (foundationNavAttrs[ControllerNavBarTitleKey]) {
+        self.navigationItem.title = foundationNavAttrs[ControllerNavBarTitleKey];
+    }
+    
+    //attr有值
+    if (foundationNavAttrs[ControllerNavBarAttrsKey]) {
+        [self.navigationController.navigationBar setTitleTextAttributes:foundationNavAttrs[ControllerNavBarAttrsKey]];
+    }
 }
 
 - (void)foundation_setBaseURL:(NSString *)url {
@@ -143,59 +150,87 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
 }
 
 #pragma mark - Custom Method
-- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,id> *)param Success:(void (^)(id))success Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> *))failure {
+- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> * _Nonnull))failure {
     
-    AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
-    
-    AFHTTPRequestSerializer *reqSer = [AFHTTPRequestSerializer serializer];
-    reqSer.timeoutInterval = 15.0;
-    
-    AFHTTPResponseSerializer *resSer = [AFHTTPResponseSerializer serializer];
-    resSer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", nil];
-    
-    sessionManager.requestSerializer = reqSer;
-    sessionManager.responseSerializer = resSer;
+    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
     
     [sessionManager GET:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        
-        success(responseObject);
-        
+        success([self foundation_handleResponseObject:responseObject]);
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        
-        NSMutableDictionary *errorDic = [NSMutableDictionary dictionary];
-        
-        //判断系统错误码
-        switch (error.code) {
-                
-            case NSURLErrorTimedOut:{
-                
-                [errorDic setValue:@"请求超时" forKey:RequestFailureDescKey];
-            }break;
-                
-            case NSURLErrorBadURL | NSURLErrorUnsupportedURL:{
-                
-                [errorDic setValue:@"错误的请求地址" forKey:RequestFailureDescKey];
-            }break;
-                
-            case NSURLErrorNotConnectedToInternet:{
-                
-                [errorDic setValue:@"当前无网络连接" forKey:RequestFailureDescKey];
-            }break;
-                
-            default:
-                break;
-        }
-        
-        //若不是上述几种情况，则把系统描述返回
-        if (errorDic.count == 0) {
-            
-            [errorDic setValue:error.localizedDescription forKey:RequestFailureDescKey];
-        }
+        failure([self foundation_handleRequestError:error]);
     }];
 }
 
-- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,id> *)param Success:(void (^)(id))success Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> *))failure {
+- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> * _Nonnull))failure {
     
+    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
+    
+    [sessionManager POST:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        success([self foundation_handleResponseObject:responseObject]);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        failure([self foundation_handleRequestError:error]);
+    }];
+}
+
+- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Images:(NSDictionary<NSString *,UIImage *> *)images Success:(void (^)(id _Nullable))success Progress:(void (^)(NSProgress * _Nonnull))progress Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> * _Nonnull))failure {
+
+    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
+
+    [sessionManager POST:url parameters:param constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        for (NSString *key in images.allKeys) {
+            [formData appendPartWithFormData:UIImageJPEGRepresentation(images[key], 1.0) name:key];
+        }
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        progress(uploadProgress);
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        success([self foundation_handleResponseObject:responseObject]);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        failure([self foundation_handleRequestError:error]);
+    }];
+}
+
+
+/**
+ 处理请求错误
+
+ @param error CocoaRequest Error
+ @return 错误描述
+ */
+- (NSDictionary<RequestFailureKey, NSString *> *)foundation_handleRequestError:(NSError *)error {
+
+    NSMutableDictionary *errorDic = [NSMutableDictionary dictionary];
+    
+    //判断系统错误码
+    switch (error.code) {
+            
+        case NSURLErrorTimedOut:{
+            [errorDic setValue:@"请求超时" forKey:RequestFailureDescKey];
+        }break;
+            
+        case NSURLErrorBadURL | NSURLErrorUnsupportedURL:{
+            [errorDic setValue:@"错误的请求地址" forKey:RequestFailureDescKey];
+        }break;
+            
+        case NSURLErrorNotConnectedToInternet:{
+            [errorDic setValue:@"当前无网络连接" forKey:RequestFailureDescKey];
+        }break;
+            
+        default:
+            break;
+    }
+    
+    //若不是上述几种情况，则把系统描述返回
+    if (errorDic.count == 0) {
+        [errorDic setValue:error.localizedDescription forKey:RequestFailureDescKey];
+    }
+    return errorDic.copy;
+}
+
+/**
+ 设置SessionManager
+ */
+- (AFHTTPSessionManager *)foundation_sessionManagerConfig {
+
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
     
     AFHTTPRequestSerializer *reqSer = [AFHTTPRequestSerializer serializer];
@@ -206,43 +241,21 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
     
     sessionManager.requestSerializer = reqSer;
     sessionManager.responseSerializer = resSer;
-    
-    [sessionManager POST:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+
+    return sessionManager;
+}
+
+/**
+ 返回值类型判断
+ */
+- (id)foundation_handleResponseObject:(id)object {
+
+    if ([object isKindOfClass:[NSData class]]) {
         
-        success(responseObject);
-        
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        
-        NSMutableDictionary *errorDic = [NSMutableDictionary dictionary];
-        
-        //判断系统错误码
-        switch (error.code) {
-                
-            case NSURLErrorTimedOut:{
-                
-                [errorDic setValue:@"请求超时" forKey:RequestFailureDescKey];
-            }break;
-                
-            case NSURLErrorBadURL | NSURLErrorUnsupportedURL:{
-                
-                [errorDic setValue:@"错误的请求地址" forKey:RequestFailureDescKey];
-            }break;
-                
-            case NSURLErrorNotConnectedToInternet:{
-                
-                [errorDic setValue:@"当前无网络连接" forKey:RequestFailureDescKey];
-            }break;
-                
-            default:
-                break;
-        }
-        
-        //若不是上述几种情况，则把系统描述返回
-        if (errorDic.count == 0) {
-            
-            [errorDic setValue:error.localizedDescription forKey:RequestFailureDescKey];
-        }
-    }];
+        id json = [NSJSONSerialization JSONObjectWithData:object options:NSJSONReadingMutableContainers error:nil];
+        return json;
+    }
+    return object;
 }
 
 - (MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void (^)())handle {
@@ -319,27 +332,25 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
 
 @implementation UIScrollView (DDQFoundationFreshStateHandle)
 
-- (void)EndRefreshing {
+- (void)foundation_endRefreshing {
 
-    //头视图判断
-    if (self.mj_header.state == MJRefreshStateRefreshing) {//头视图如果在刷新就暂停
+    if (self.mj_header.state == MJRefreshStateRefreshing) {
         
         [self.mj_header endRefreshing];
     }
     
-    //脚视图判断
-    if (self.mj_footer.state == MJRefreshStateRefreshing) {//脚视图如果在刷新就暂停
+    if (self.mj_footer.state == MJRefreshStateRefreshing) {
         
         [self.mj_footer endRefreshing];
     }
 }
 
-- (void)EndNoMoreData {
+- (void)foundation_endNoMoreData {
 
     [self.mj_footer endRefreshingWithNoMoreData];
 }
 
-- (void)EndRestNoMoreData {
+- (void)foundation_endRestNoMoreData {
 
     [self.mj_footer resetNoMoreData];
 }
@@ -368,7 +379,9 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
 
 + (instancetype)alertHUDInView:(UIView *)view Mode:(MBProgressHUDMode)mode Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate {
 
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
+    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:view];
+    [view addSubview:hud];
+    
     hud.mode = mode;
     hud.label.text = text;
     hud.delegate = delegate;
