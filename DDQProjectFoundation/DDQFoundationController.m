@@ -8,28 +8,18 @@
 #import <AFNetworking/AFNetworking.h>
 #import <MJRefresh/MJRefresh.h>
 
-@interface DDQFoundationController (){
+#import <objc/runtime.h>
 
-    NSString *_navBarBackgroundImageName;
-}
+#import <AVFoundation/AVFoundation.h>
+#import <HealthKit/HealthKit.h>
+
+@interface DDQFoundationController ()
 
 @end
 
 @implementation DDQFoundationController
 
-RequestFailureKey const RequestFailureDescKey = @"com.ddq.errorDesc";
-ControllerNavBarContentKey const ControllerNavBarTitleKey = @"com.ddq.navBarTitle";
-ControllerNavBarContentKey const ControllerNavBarAttrsKey = @"com.ddq.navBarAttrs";
-
-static NSString *DDQFoundationArchiverURLPath = nil;
-static NSString *DDQFoundationArchiverNavBGImagePath = nil;
-
-+ (void)load {
-
-    NSString *cachePath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
-    DDQFoundationArchiverURLPath = [cachePath stringByAppendingPathComponent:@"DDQBaseURL"];
-    DDQFoundationArchiverNavBGImagePath = [cachePath stringByAppendingPathComponent:@"DDQNavBGName"];
-}
+DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq.foundation.errorDesc";
 
 - (void)viewDidLoad {
     
@@ -37,66 +27,9 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
     
     //view的一些设置
     [self setAutomaticallyAdjustsScrollViewInsets:NO];
-    
-    //navbar的设置
-    self.navigationController.navigationBar.translucent = NO;
-    _navBarBackgroundImageName = [NSKeyedUnarchiver unarchiveObjectWithFile:DDQFoundationArchiverNavBGImagePath];
-    self.navigationController.navigationBar.shadowImage = [UIImage new];
-    [self.navigationController.navigationBar setBackgroundImage:kSetImage(_navBarBackgroundImageName) forBarMetrics:UIBarMetricsDefault];
 }
 
 #pragma mark - Base Method
-+ (instancetype)foundationController {
-    
-    return [[self alloc] init];
-}
-
-- (void)setFoundationNavAttrs:(NSDictionary<ControllerNavBarContentKey,id> *)foundationNavAttrs {
-    
-    _foundationNavAttrs = foundationNavAttrs;
-    //标题有值
-    if (foundationNavAttrs[ControllerNavBarTitleKey]) {
-        self.navigationItem.title = foundationNavAttrs[ControllerNavBarTitleKey];
-    }
-    
-    //attr有值
-    if (foundationNavAttrs[ControllerNavBarAttrsKey]) {
-        [self.navigationController.navigationBar setTitleTextAttributes:foundationNavAttrs[ControllerNavBarAttrsKey]];
-    }
-}
-
-- (void)foundation_setBaseURL:(NSString *)url {
-
-    [NSKeyedArchiver archiveRootObject:url toFile:DDQFoundationArchiverURLPath];
-}
-
-- (NSString *)foundationBaseURL {
-
-    return [NSKeyedUnarchiver unarchiveObjectWithFile:DDQFoundationArchiverURLPath];
-}
-
-- (void)foundation_setNavigationBarBackgroundImageName:(NSString *)name {
-
-    [NSKeyedArchiver archiveRootObject:name toFile:DDQFoundationArchiverNavBGImagePath];
-}
-
-- (MBProgressHUD *)foundationDefaultHUD {
-    
-    _foundationDefaultHUD = [MBProgressHUD HUDForView:self.view];
-    //非空判断
-    if (!_foundationDefaultHUD) {
-        
-        _foundationDefaultHUD = [[MBProgressHUD alloc] initWithView:self.view];
-        [self.view addSubview:_foundationDefaultHUD];
-    }
-    
-    //层级判断
-    if (self.view.subviews.lastObject != _foundationDefaultHUD) {//最上层的不是hud，就把他移到最上层
-        [self.view bringSubviewToFront:_foundationDefaultHUD];
-    }
-    return _foundationDefaultHUD;
-}
-
 - (UIButton *)setLeftBarButtonItemStyle:(DDQFoundationBarButtonStyle)style Content:(id)content {
     
     UIBarButtonItem *leftItem = nil;
@@ -148,125 +81,19 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
     
     return customButton;
 }
+@end
 
-#pragma mark - Custom Method
-- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> * _Nonnull))failure {
-    
-    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
-    
-    [sessionManager GET:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        success([self foundation_handleResponseObject:responseObject]);
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        failure([self foundation_handleRequestError:error]);
-    }];
-}
-
-- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> * _Nonnull))failure {
-    
-    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
-    
-    [sessionManager POST:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        success([self foundation_handleResponseObject:responseObject]);
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        failure([self foundation_handleRequestError:error]);
-    }];
-}
-
-- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Images:(NSDictionary<NSString *,UIImage *> *)images Success:(void (^)(id _Nullable))success Progress:(void (^)(NSProgress * _Nonnull))progress Failure:(void (^)(NSDictionary<RequestFailureKey,NSString *> * _Nonnull))failure {
-
-    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
-
-    [sessionManager POST:url parameters:param constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
-        for (NSString *key in images.allKeys) {
-            [formData appendPartWithFormData:UIImageJPEGRepresentation(images[key], 1.0) name:key];
-        }
-    } progress:^(NSProgress * _Nonnull uploadProgress) {
-        progress(uploadProgress);
-    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        success([self foundation_handleResponseObject:responseObject]);
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        failure([self foundation_handleRequestError:error]);
-    }];
-}
-
-
-/**
- 处理请求错误
-
- @param error CocoaRequest Error
- @return 错误描述
- */
-- (NSDictionary<RequestFailureKey, NSString *> *)foundation_handleRequestError:(NSError *)error {
-
-    NSMutableDictionary *errorDic = [NSMutableDictionary dictionary];
-    
-    //判断系统错误码
-    switch (error.code) {
-            
-        case NSURLErrorTimedOut:{
-            [errorDic setValue:@"请求超时" forKey:RequestFailureDescKey];
-        }break;
-            
-        case NSURLErrorBadURL | NSURLErrorUnsupportedURL:{
-            [errorDic setValue:@"错误的请求地址" forKey:RequestFailureDescKey];
-        }break;
-            
-        case NSURLErrorNotConnectedToInternet:{
-            [errorDic setValue:@"当前无网络连接" forKey:RequestFailureDescKey];
-        }break;
-            
-        default:
-            break;
-    }
-    
-    //若不是上述几种情况，则把系统描述返回
-    if (errorDic.count == 0) {
-        [errorDic setValue:error.localizedDescription forKey:RequestFailureDescKey];
-    }
-    return errorDic.copy;
-}
-
-/**
- 设置SessionManager
- */
-- (AFHTTPSessionManager *)foundation_sessionManagerConfig {
-
-    AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
-    
-    AFHTTPRequestSerializer *reqSer = [AFHTTPRequestSerializer serializer];
-    reqSer.timeoutInterval = 15.0;
-    
-    AFHTTPResponseSerializer *resSer = [AFHTTPResponseSerializer serializer];
-    resSer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", nil];
-    
-    sessionManager.requestSerializer = reqSer;
-    sessionManager.responseSerializer = resSer;
-
-    return sessionManager;
-}
-
-/**
- 返回值类型判断
- */
-- (id)foundation_handleResponseObject:(id)object {
-
-    if ([object isKindOfClass:[NSData class]]) {
-        
-        id json = [NSJSONSerialization JSONObjectWithData:object options:NSJSONReadingMutableContainers error:nil];
-        return json;
-    }
-    return object;
-}
+@implementation DDQFoundationController (DDQFoundationRefreshConfig)
 
 - (MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void (^)())handle {
-
+    
     Class headerClass;
     switch (style) {
             
         case DDQFoundationHeaderStyleNormal:{
             headerClass = [MJRefreshNormalHeader class];
         }break;
-           
+            
         case DDQFoundationHeaderStyleGif:{
             headerClass = [MJRefreshGifHeader class];
         }break;
@@ -279,7 +106,7 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
             break;
     }
     scrollView.mj_header = [headerClass headerWithRefreshingBlock:^{
-
+        
         if (handle) {
             handle();
         }
@@ -288,7 +115,7 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
 }
 
 - (MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void (^)())handle {
-
+    
     Class footerClass;
     switch (style) {
             
@@ -327,13 +154,12 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
     }];
     return scrollView.mj_footer;
 }
-
 @end
 
-@implementation UIScrollView (DDQFoundationFreshStateHandle)
+@implementation UIScrollView (DDQFoundationRefreshHandle)
 
 - (void)foundation_endRefreshing {
-
+    
     if (self.mj_header.state == MJRefreshStateRefreshing) {
         
         [self.mj_header endRefreshing];
@@ -346,30 +172,161 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
 }
 
 - (void)foundation_endNoMoreData {
-
+    
     [self.mj_footer endRefreshingWithNoMoreData];
 }
 
 - (void)foundation_endRestNoMoreData {
-
+    
     [self.mj_footer resetNoMoreData];
 }
 @end
 
-@implementation MBProgressHUD (DDQFoundationHUDShowHandle)
+@implementation DDQFoundationController (DDQFoundationNetRequest)
 
-+ (void)alertHUDInView:(UIView *)view Text:(NSString *)text {
-
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
-    hud.label.text = text;
-    hud.mode = MBProgressHUDModeText;
-    hud.removeFromSuperViewOnHide = YES;
-    [hud hideAnimated:YES afterDelay:1.0];
+- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
+    
+    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
+    
+    [sessionManager GET:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        success([self foundation_handleResponseObject:responseObject]);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        failure([self foundation_handleRequestError:error]);
+    }];
 }
 
-+ (void)alertHUDInView:(UIView *)view Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate {
+- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
+    
+    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
+    
+    [sessionManager POST:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        success([self foundation_handleResponseObject:responseObject]);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        failure([self foundation_handleRequestError:error]);
+    }];
+}
 
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
+- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Images:(NSDictionary<NSString *,UIImage *> *)images Success:(void (^)(id _Nullable))success Progress:(void (^)(NSProgress * _Nonnull))progress Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
+    
+    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
+    
+    [sessionManager POST:url parameters:param constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        for (NSString *key in images.allKeys) {
+            [formData appendPartWithFormData:UIImageJPEGRepresentation(images[key], 1.0) name:key];
+        }
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        progress(uploadProgress);
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        success([self foundation_handleResponseObject:responseObject]);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        failure([self foundation_handleRequestError:error]);
+    }];
+}
+
+/**
+ 处理请求错误
+ 
+ @param error CocoaRequest Error
+ @return 错误描述
+ */
+- (NSDictionary<DDQFoundationRequestFailureKey, NSString *> *)foundation_handleRequestError:(NSError *)error {
+    
+    NSMutableDictionary *errorDic = [NSMutableDictionary dictionary];
+    
+    //判断系统错误码
+    switch (error.code) {
+            
+        case NSURLErrorTimedOut:{
+            [errorDic setValue:@"请求超时" forKey:DDQFoundationRequestFailureDesc];
+        }break;
+            
+        case NSURLErrorBadURL | NSURLErrorUnsupportedURL:{
+            [errorDic setValue:@"错误的请求地址" forKey:DDQFoundationRequestFailureDesc];
+        }break;
+            
+        case NSURLErrorNotConnectedToInternet:{
+            [errorDic setValue:@"当前无网络连接" forKey:DDQFoundationRequestFailureDesc];
+        }break;
+            
+        default:
+            break;
+    }
+    
+    //若不是上述几种情况，则把系统描述返回
+    if (errorDic.count == 0) {
+        [errorDic setValue:error.localizedDescription forKey:DDQFoundationRequestFailureDesc];
+    }
+    return errorDic.copy;
+}
+
+/**
+ 设置SessionManager
+ */
+- (AFHTTPSessionManager *)foundation_sessionManagerConfig {
+    
+    AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
+    
+    AFHTTPRequestSerializer *reqSer = [AFHTTPRequestSerializer serializer];
+    reqSer.timeoutInterval = 15.0;
+    
+    AFHTTPResponseSerializer *resSer = [AFHTTPResponseSerializer serializer];
+    resSer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", nil];
+    
+    sessionManager.requestSerializer = reqSer;
+    sessionManager.responseSerializer = resSer;
+    
+    return sessionManager;
+}
+
+/**
+ 返回值类型判断
+ */
+- (id)foundation_handleResponseObject:(id)object {
+    
+    if ([object isKindOfClass:[NSData class]]) {
+        
+        id json = [NSJSONSerialization JSONObjectWithData:object options:NSJSONReadingMutableContainers error:nil];
+        return json;
+    }
+    return object;
+}
+@end
+
+@implementation DDQFoundationController (DDQFoundationUserInterface)
+
+static const char *HUDKey = "com.ddq.foundation.defaultHUD";
+
+- (void)setFoundation_hud:(MBProgressHUD *)foundation_hud {
+
+    objc_setAssociatedObject(self, HUDKey, foundation_hud, OBJC_ASSOCIATION_RETAIN);
+}
+
+- (MBProgressHUD *)foundation_hud {
+
+    MBProgressHUD *hud = objc_getAssociatedObject(self, HUDKey);
+    if (hud) {
+        
+        [self.view bringSubviewToFront:hud];
+        return hud;
+    } else {
+    
+        hud = [MBProgressHUD HUDForView:self.view];
+        
+        if (hud) {
+            
+            [self.view bringSubviewToFront:hud];
+            return hud;
+        }
+        hud = [[MBProgressHUD alloc] initWithView:self.view];
+        [self.view addSubview:hud];
+        hud.label.text = @"请稍候...";
+        return hud;
+    }
+}
+
+- (void)alertHUDWithText:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate {
+    
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     hud.label.text = text;
     hud.mode = MBProgressHUDModeText;
     hud.delegate = delegate;
@@ -377,10 +334,10 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
     [hud hideAnimated:YES afterDelay:1.0];
 }
 
-+ (instancetype)alertHUDInView:(UIView *)view Mode:(MBProgressHUDMode)mode Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate {
-
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:view];
-    [view addSubview:hud];
+- (MBProgressHUD *)alertHUDWithMode:(MBProgressHUDMode)mode Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate {
+    
+    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
+    [self.view addSubview:hud];
     
     hud.mode = mode;
     hud.label.text = text;
@@ -388,5 +345,43 @@ static NSString *DDQFoundationArchiverNavBGImagePath = nil;
     hud.removeFromSuperViewOnHide = YES;
     return hud;
 }
+@end
 
+@implementation DDQFoundationController (DDQFoundationUserAuthority)
+
++ (NSError *)foundation_checkUserAuthorityWithType:(DDQFoundationAuthorityType)type {
+
+    NSError *error = nil;
+    if (type == DDQFoundationAuthorityCamera) {
+        
+        if ([UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera]) {
+            
+            error = [NSError errorWithDomain:@"该设备没有摄像头" code:DDQFoundationErrorNoCamera userInfo:nil];
+            return error;
+        }
+        
+        if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] != AVAuthorizationStatusAuthorized) {
+            
+            error = [NSError errorWithDomain:@"暂无摄像头权限" code:DDQFoundationErrorCameraNotUse userInfo:nil];
+            return error;
+        }
+        return error;
+    } else if (type == DDQFoundationAuthorityHealth) {
+    
+        if ([HKHealthStore isHealthDataAvailable]) {
+            
+            error = [NSError errorWithDomain:@"该设备不支持访问健康" code:DDQFoundationErrorNoCamera userInfo:nil];
+            return error;
+        }
+        return error;
+    }
+    //2017-7-12 部分权限判断未实现
+    return error;
+}
+
++ (void)foundation_gotoAppSystemSet {
+
+    NSString *appDisplayName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"prefs:root=Apps&path=%@", appDisplayName]]];
+}
 @end
