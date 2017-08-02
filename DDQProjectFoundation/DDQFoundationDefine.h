@@ -19,14 +19,16 @@
 #define kSetColor(r, g, b, a) [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a]
 
 #ifdef DEBUG
-    #define DDQLog(...) NSLog(@"%s 第%d行 \n %@\n\n",__func__,__LINE__,[NSString stringWithFormat:__VA_ARGS__])
+#define DDQLog(...) NSLog(@"%s 第%d行 \n %@\n\n",__func__,__LINE__,[NSString stringWithFormat:__VA_ARGS__])
 #else
-    #define DDQLog(...)
+#define DDQLog(...)
 #endif
 
 #define DDQSystemVersion [UIDevice currentDevice].systemVersion.floatValue
 #define DDQ_iOS_VersionLater(version) DDQSystemVersion >= version ? YES:NO
 
 #define DDQWeakObject(objc)  __weak typeof(objc) weakObjc = objc
+
+#define DDQ_DEPRECATED(_available, _deprecated, ...)  NS_DEPRECATED_IOS(_available, _deprecated, __VA_ARGS__)
 
 #endif /* DDQFoundationDefine_h */

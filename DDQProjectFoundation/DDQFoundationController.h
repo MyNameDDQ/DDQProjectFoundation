@@ -6,6 +6,7 @@
 #import <UIKit/UIKit.h>
 
 #import "DDQFoundationHeader.h"
+#import <AFNetworking/AFNetworking.h>
 
 NS_ASSUME_NONNULL_BEGIN
 typedef NSString * DDQFoundationControllerSourceKey;       //数据源标识
@@ -43,15 +44,22 @@ typedef NS_ENUM(NSUInteger, DDQFoundationAuthorityType) {
     DDQFoundationAuthorityPhotoLibary,  //相册
 };
 
-typedef NS_ENUM(NSUInteger, DDQFoundationErrorCode) {
+typedef NS_ENUM(NSUInteger, DDQFoundationAuthorityErrorCode) {
     
-    DDQFoundationErrorRequestFailure = 107038,
     DDQFoundationErrorNoCamera,
     DDQFoundationErrorCameraNotUse,
     DDQFoundationErrorNoMicrophone,
     DDQFoundationErrorMicrophoneNotUse,
     DDQFoundationErrorPhotoLibaryNotUse,
     DDQFoundationErrorHealthKitNotUse,
+};
+
+typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
+    
+    DDQFoundationRequestFailure = 107038,
+    DDQFoundationRequestNotConnection,
+    DDQFoundationRequestTimeOut,
+    DDQFoundationRequestCancel,
 };
 
 @class MJRefreshHeader;
@@ -86,7 +94,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationErrorCode) {
  @param handle 下拉的回调
  @return 如果需要，自己设置这个Header
  */
-- (__kindof MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void(^)())handle;
++ (__kindof MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void(^)())handle;
 
 /**
  设置Footer
@@ -96,7 +104,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationErrorCode) {
  @param handle 上拉的回调
  @return 如果需要，自己设置这个Footer
  */
-- (__kindof MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void(^)())handle;
++ (__kindof MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void(^)())handle;
 @end
 
 @interface UIScrollView (DDQFoundationRefreshHandle)
@@ -118,6 +126,38 @@ typedef NS_ENUM(NSUInteger, DDQFoundationErrorCode) {
 @end
 
 @interface DDQFoundationController (DDQFoundationNetRequest)
+
+/**
+ 网络监控
+ */
+@property (nonatomic, strong) AFNetworkReachabilityManager *foundation_reachability;
+
+/**
+ jsonResponse
+ */
+@property (nonatomic, assign) BOOL foundation_jsonResponse;
+
+/**
+ 设置http请求头
+ 
+ @param field 请求头参数
+ */
+- (void)foundation_setHttpField:(NSDictionary *)field;
+
+/**
+ 检查当前网络状况
+ 
+ @param result 检查结果
+ */
+- (void)foundation_checkUserNetStatus:(void(^)(AFNetworkReachabilityStatus status, AFNetworkReachabilityManager *manager))result;
+
+/**
+ 当前网络状况发生改变
+ 
+ @param result 改变结果
+ */
+- (void)foundation_checkUserNetChange:(void (^)(AFNetworkReachabilityStatus status, AFNetworkReachabilityManager *manager))result;
+
 /**
  基础请求：GET
  
@@ -126,7 +166,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationErrorCode) {
  @param success 请求成功
  @param failure 请求失败
  */
-- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *, NSString *> *)param Success:(void(^)(id _Nullable result))success Failure:(void(^)(NSDictionary<DDQFoundationRequestFailureKey, NSString *> *errDic))failure;
+- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Success:(void(^)(id _Nullable result))success Failure:(void(^)(NSDictionary<DDQFoundationRequestFailureKey, NSString *> *errDic))failure;
 
 /**
  基础请求:POST
@@ -136,7 +176,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationErrorCode) {
  @param success 请求成功
  @param failure 请求失败
  */
-- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *, NSString *> *)param Success:(void (^)(id _Nullable result))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> *errDic))failure;
+- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Success:(void (^)(id _Nullable result))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> *errDic))failure;
 
 /**
  基础请求:上传图片
@@ -148,10 +188,32 @@ typedef NS_ENUM(NSUInteger, DDQFoundationErrorCode) {
  @param progress 上传进度
  @param failure 上传失败
  */
-- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *, NSString *> *)param Images:(NSDictionary<NSString *, UIImage *> *)images Success:(void (^)(id _Nullable result))success Progress:(void (^)(NSProgress *progress))progress Failure:(void(^)(NSDictionary<DDQFoundationRequestFailureKey, NSString *> *errDic))failure;
+- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Images:(NSDictionary<NSString *, UIImage *> *)images Success:(void (^)(id _Nullable result))success Progress:(void (^)(NSProgress *progress))progress Failure:(void(^)(NSDictionary<DDQFoundationRequestFailureKey, NSString *> *errDic))failure;
+
+/**
+ 基础请求:base64上传图片
+ 
+ @param url 访问地址
+ @param param 访问参数
+ @param success 上传成功
+ @param progress 上传进度
+ @param failure 上传失败
+ */
+- (void)foundation_UploadBase64StringWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Success:(void(^)(id _Nullable result))success Progress:(void(^)(double progress))progress Failure:(void(^)(NSDictionary<DDQFoundationRequestFailureKey, NSString *> *errDic))failure;
 @end
 
-@interface DDQFoundationController (DDQFoundationUserInterface)
+
+@protocol DDQFoundationHUDHandler <NSObject>
+@optional
+
+/**
+ 有时候需要指定HUD的父视图
+ */
+- (UIView *)foundation_HUDSuperView;
+
+@end
+
+@interface DDQFoundationController (DDQFoundationUserInterface)<DDQFoundationHUDHandler>
 /**
  控制器默认的hud
  */
@@ -167,20 +229,20 @@ typedef NS_ENUM(NSUInteger, DDQFoundationErrorCode) {
 
 /**
  获得一个hud
-
+ 
  @param mode hud类型
  @param text 显示的文字
  @param delegate hud代理
  @return hud的实例
  */
-- (MBProgressHUD *)alertHUDWithMode:(MBProgressHUDMode)mode Text:(NSString *)text Delegate:(nullable id<MBProgressHUDDelegate>)delegate;
+- (MBProgressHUD *)alertHUDWithMode:(MBProgressHUDMode)mode Text:(nullable NSString *)text Delegate:(nullable id<MBProgressHUDDelegate>)delegate;
 @end
 
 @interface DDQFoundationController (DDQFoundationUserAuthority)
 
 /**
  判断设备的对应权限
-
+ 
  @param type 判断类型
  @return 错误信息，无错误信息则为空
  */

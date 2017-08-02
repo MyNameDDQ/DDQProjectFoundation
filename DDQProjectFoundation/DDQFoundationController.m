@@ -5,15 +5,21 @@
 
 #import "DDQFoundationController.h"
 
-#import <AFNetworking/AFNetworking.h>
 #import <MJRefresh/MJRefresh.h>
 
 #import <objc/runtime.h>
 
-#import <AVFoundation/AVFoundation.h>
+#import <Photos/Photos.h>
 #import <HealthKit/HealthKit.h>
+#import <AVFoundation/AVFoundation.h>
+#import <AssetsLibrary/AssetsLibrary.h>
 
-@interface DDQFoundationController ()
+@interface DDQFoundationController ()<UIGestureRecognizerDelegate> {
+    
+    AFNetworkReachabilityManager *_reachabilityManager;
+}
+
+@property (nonatomic, copy) NSDictionary *httpField;
 
 @end
 
@@ -53,6 +59,7 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     [itemArray addObject:leftItem];
     [self.navigationItem setLeftBarButtonItems:itemArray.copy animated:YES];
     
+    
     return customButton;
 }
 
@@ -71,10 +78,18 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
         rightItem = [[UIBarButtonItem alloc] initWithCustomView:customButton];
     }
     
-    //设置leftItem
+    //设置rightItem
     NSMutableArray *itemArray = self.navigationItem.rightBarButtonItems.mutableCopy;
     if (!itemArray) {
         itemArray = [NSMutableArray array];
+    }
+    
+    if (itemArray.count >= 1) {//已经有了一个item了
+        
+        //那么设置一个占位的item，分开点距离
+        UIView *placeholderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, 0.0, 0.0)];
+        UIBarButtonItem *placeholderItem = [[UIBarButtonItem alloc] initWithCustomView:placeholderView];
+        [itemArray addObject:placeholderItem];
     }
     [itemArray addObject:rightItem];
     [self.navigationItem setRightBarButtonItems:itemArray.copy animated:YES];
@@ -85,7 +100,7 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
 
 @implementation DDQFoundationController (DDQFoundationRefreshConfig)
 
-- (MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void (^)())handle {
++ (MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void (^)())handle {
     
     Class headerClass;
     switch (style) {
@@ -114,7 +129,7 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     return scrollView.mj_header;
 }
 
-- (MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void (^)())handle {
++ (MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void (^)())handle {
     
     Class footerClass;
     switch (style) {
@@ -184,7 +199,66 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
 
 @implementation DDQFoundationController (DDQFoundationNetRequest)
 
-- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
+static const char *response = "com.ddq.netResponse";
+- (void)setFoundation_jsonResponse:(BOOL)foundation_jsonResponse {
+    objc_setAssociatedObject(self, response, @(foundation_jsonResponse), OBJC_ASSOCIATION_RETAIN);
+}
+
+- (BOOL)foundation_jsonResponse {
+    
+    NSNumber *number = objc_getAssociatedObject(self, response);
+    if (number) {
+        return number.boolValue;
+    } else {
+        return NO;
+    }
+}
+
+- (void)setFoundation_reachability:(AFNetworkReachabilityManager *)foundation_reachability {
+    
+    _reachabilityManager = foundation_reachability;
+}
+
+- (AFNetworkReachabilityManager *)foundation_reachability {
+    
+    if (!_reachabilityManager) {
+        _reachabilityManager = [AFNetworkReachabilityManager sharedManager];
+        [_reachabilityManager startMonitoring];
+    }
+    return _reachabilityManager;
+}
+
+- (void)foundation_setHttpField:(NSDictionary *)field {
+    
+    self.httpField = field;
+}
+
+- (void)foundation_checkUserNetStatus:(void (^)(AFNetworkReachabilityStatus, AFNetworkReachabilityManager * _Nonnull))result {
+    
+    AFNetworkReachabilityManager *reachbility = [AFNetworkReachabilityManager sharedManager];
+    [reachbility startMonitoring];
+    
+    if (result) {
+        result(reachbility.networkReachabilityStatus, reachbility);
+        [reachbility stopMonitoring];
+    }
+}
+
+- (void)foundation_checkUserNetChange:(void (^)(AFNetworkReachabilityStatus, AFNetworkReachabilityManager * _Nonnull))result {
+    
+    AFNetworkReachabilityManager *reachbility = [AFNetworkReachabilityManager sharedManager];
+    [reachbility startMonitoring];
+    
+    DDQWeakObject(reachbility);
+    [reachbility setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        
+        if (result) {
+            result(status, weakObjc);
+        }
+    }];
+}
+
+- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
     
     AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
     
@@ -195,7 +269,7 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     }];
 }
 
-- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
+- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
     
     AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
     
@@ -206,16 +280,43 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     }];
 }
 
-- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Images:(NSDictionary<NSString *,UIImage *> *)images Success:(void (^)(id _Nullable))success Progress:(void (^)(NSProgress * _Nonnull))progress Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
+- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *,NSString *> *)param Images:(NSDictionary<NSString *,UIImage *> *)images Success:(void (^)(id _Nullable))success Progress:(void (^)(NSProgress * _Nonnull))progress Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
     
     AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
     
     [sessionManager POST:url parameters:param constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        
         for (NSString *key in images.allKeys) {
-            [formData appendPartWithFormData:UIImageJPEGRepresentation(images[key], 1.0) name:key];
+            if (UIImageJPEGRepresentation(images[key], 1.0)) {
+                [formData appendPartWithFormData:UIImageJPEGRepresentation(images[key], 1.0) name:key];
+            } else {
+                [formData appendPartWithFormData:UIImagePNGRepresentation(images[key]) name:key];
+            }
         }
     } progress:^(NSProgress * _Nonnull uploadProgress) {
-        progress(uploadProgress);
+        
+        if (![NSThread isMainThread]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                progress(uploadProgress);
+            });
+        }
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        success([self foundation_handleResponseObject:responseObject]);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        failure([self foundation_handleRequestError:error]);
+    }];
+}
+
+- (void)foundation_UploadBase64StringWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Progress:(void (^)(double))progress Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
+    
+    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
+    [sessionManager POST:url parameters:param progress:^(NSProgress * _Nonnull uploadProgress) {
+        
+        if (![NSThread isMainThread]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                progress(uploadProgress.fractionCompleted);
+            });
+        }
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         success([self foundation_handleResponseObject:responseObject]);
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
@@ -266,11 +367,26 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
     
-    AFHTTPRequestSerializer *reqSer = [AFHTTPRequestSerializer serializer];
+    AFHTTPRequestSerializer *reqSer = nil;
+    if (!self.foundation_jsonResponse) {
+        reqSer = [AFHTTPRequestSerializer serializer];
+    } else {
+        reqSer = [AFJSONRequestSerializer serializer];
+    }
     reqSer.timeoutInterval = 15.0;
+    for (NSString *key in self.httpField.allKeys) {
+        
+        [reqSer setValue:self.httpField[key] forHTTPHeaderField:key];
+    }
+    reqSer.networkServiceType = NSURLNetworkServiceTypeDefault;
     
-    AFHTTPResponseSerializer *resSer = [AFHTTPResponseSerializer serializer];
-    resSer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", nil];
+    AFHTTPResponseSerializer *resSer = nil;
+    if (!self.foundation_jsonResponse) {
+        resSer = [AFHTTPResponseSerializer serializer];
+    } else {
+        resSer = [AFJSONResponseSerializer serializer];
+    }
+    resSer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", @"text/plain", nil];
     
     sessionManager.requestSerializer = reqSer;
     sessionManager.responseSerializer = resSer;
@@ -297,28 +413,35 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
 static const char *HUDKey = "com.ddq.foundation.defaultHUD";
 
 - (void)setFoundation_hud:(MBProgressHUD *)foundation_hud {
-
+    
     objc_setAssociatedObject(self, HUDKey, foundation_hud, OBJC_ASSOCIATION_RETAIN);
 }
 
 - (MBProgressHUD *)foundation_hud {
-
+    
     MBProgressHUD *hud = objc_getAssociatedObject(self, HUDKey);
     if (hud) {
         
         [self.view bringSubviewToFront:hud];
         return hud;
     } else {
-    
-        hud = [MBProgressHUD HUDForView:self.view];
+        
+        UIView *hudSuperView = nil;
+        if ([self respondsToSelector:@selector(foundation_HUDSuperView)]) {
+            hudSuperView = [self performSelector:@selector(foundation_HUDSuperView)];
+        } else {
+            hudSuperView = self.view;
+        }
+        
+        hud = [MBProgressHUD HUDForView:hudSuperView];
         
         if (hud) {
             
-            [self.view bringSubviewToFront:hud];
+            [hudSuperView bringSubviewToFront:hud];
             return hud;
         }
-        hud = [[MBProgressHUD alloc] initWithView:self.view];
-        [self.view addSubview:hud];
+        hud = [[MBProgressHUD alloc] initWithView:hudSuperView];
+        [hudSuperView addSubview:hud];
         hud.label.text = @"请稍候...";
         return hud;
     }
@@ -334,7 +457,7 @@ static const char *HUDKey = "com.ddq.foundation.defaultHUD";
     [hud hideAnimated:YES afterDelay:1.0];
 }
 
-- (MBProgressHUD *)alertHUDWithMode:(MBProgressHUDMode)mode Text:(NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate {
+- (MBProgressHUD *)alertHUDWithMode:(MBProgressHUDMode)mode Text:(nullable NSString *)text Delegate:(id<MBProgressHUDDelegate>)delegate {
     
     MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
     [self.view addSubview:hud];
@@ -350,38 +473,64 @@ static const char *HUDKey = "com.ddq.foundation.defaultHUD";
 @implementation DDQFoundationController (DDQFoundationUserAuthority)
 
 + (NSError *)foundation_checkUserAuthorityWithType:(DDQFoundationAuthorityType)type {
-
+    
     NSError *error = nil;
     if (type == DDQFoundationAuthorityCamera) {
         
-        if ([UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera]) {
+        if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
             
             error = [NSError errorWithDomain:@"该设备没有摄像头" code:DDQFoundationErrorNoCamera userInfo:nil];
             return error;
         }
         
-        if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] != AVAuthorizationStatusAuthorized) {
+        if (![UIImagePickerController isCameraDeviceAvailable:UIImagePickerControllerCameraDeviceRear | UIImagePickerControllerCameraDeviceFront]) {//前后摄像头是否能用
+            
+            error = [NSError errorWithDomain:@"您的摄像头不可用" code:DDQFoundationErrorNoCamera userInfo:nil];
+            return error;
+        }
+        
+        AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+        if (status == AVAuthorizationStatusRestricted || status == AVAuthorizationStatusDenied) {//是否让用
             
             error = [NSError errorWithDomain:@"暂无摄像头权限" code:DDQFoundationErrorCameraNotUse userInfo:nil];
             return error;
         }
         return error;
     } else if (type == DDQFoundationAuthorityHealth) {
-    
+        
         if ([HKHealthStore isHealthDataAvailable]) {
             
             error = [NSError errorWithDomain:@"该设备不支持访问健康" code:DDQFoundationErrorNoCamera userInfo:nil];
             return error;
         }
         return error;
+    } else if (type == DDQFoundationAuthorityPhotoLibary) {
+        
+#if (__IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_9_0)
+        PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
+        if (status == PHAuthorizationStatusRestricted || status == PHAuthorizationStatusDenied) {
+            
+            error = [NSError errorWithDomain:@"无法访问您的相册" code:DDQFoundationErrorNoCamera userInfo:nil];
+            return error;
+        }
+        
+#else
+        ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
+        
+        if (status == ALAuthorizationStatusRestricted || status == ALAuthorizationStatusDenied) {
+            
+            error = [NSError errorWithDomain:@"无法访问您的相册" code:DDQFoundationErrorNoCamera userInfo:nil];
+            return error;
+        }
+#endif
     }
     //2017-7-12 部分权限判断未实现
     return error;
 }
 
 + (void)foundation_gotoAppSystemSet {
-
-    NSString *appDisplayName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"prefs:root=Apps&path=%@", appDisplayName]]];
+    
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    
 }
 @end
