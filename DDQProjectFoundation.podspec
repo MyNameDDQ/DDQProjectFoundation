@@ -1,13 +1,13 @@
 Pod::Spec.new do |s|
-  s.name         = "DDQProjectFoundation"
-  s.version      = "1.0.7"
+  s.name         = 'DDQProjectFoundation'
+  s.version      = '1.0.9'
   s.ios.deployment_target = '8.0'
-  s.summary      = "Easy Inherit"
-  s.homepage     = "https://github.com/MyNameDDQ/DDQProjectFoundation"
-  s.license      = "MIT"
-  s.author       = { "DDQ" => "869795924@qq.com" }
-  s.source       = { :git => "https://github.com/MyNameDDQ/DDQProjectFoundation.git", :tag => s.version }
-  s.source_files = "DDQProjectFoundation/*.{h,m}"
+  s.summary      = 'Easy Inherit'
+  s.homepage     = 'https://github.com/MyNameDDQ/DDQProjectFoundation'
+  s.license      = 'MIT'
+  s.author       = { 'DDQ' => '869795924@qq.com' }
+  s.source       = { :git => 'https://github.com/MyNameDDQ/DDQProjectFoundation.git', :tag => s.version }
+  s.source_files = 'DDQProjectFoundation/*.{h,m}'
   s.requires_arc = true
   s.dependency 'AFNetworking'
   s.dependency 'SDWebImage'
@@ -17,5 +17,7 @@ Pod::Spec.new do |s|
   s.dependency 'MJExtension'
   s.dependency 'MBProgressHUD'
   s.dependency 'WebViewJavascriptBridge'
-
+  s.subspec 'SimplyUI' do |ss|
+    ss.source_files = 'DDQProjectFoundation/*.{h,m}'
+  end
 end
