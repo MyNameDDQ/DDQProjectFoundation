@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'DDQProjectFoundation'
-  s.version      = ‘1.1.0’
+  s.version      = '1.1.1'
   s.ios.deployment_target = '8.0'
   s.summary      = 'Easy Inherit'
   s.homepage     = 'https://github.com/MyNameDDQ/DDQProjectFoundation'
@@ -16,10 +16,6 @@ Pod::Spec.new do |s|
   s.dependency 'MJRefresh'
   s.dependency 'MJExtension'
   s.dependency 'MBProgressHUD'
-  s.dependency 'WebViewJavascriptBridge'
-  s.subspec 'SimplyUI' do |simply|
-    simply.source_files = 'DDQProjectFoundation/{DDQ}*.{h,m}'
-    simply.ios.deployment_target = '8.0'
-    simply.dependency 'DDQProjectFoundation/SimplyUI’
-  end
+  s.dependency 'WebViewJavascriptBridge', '~> 4.1.5'
+
 end
