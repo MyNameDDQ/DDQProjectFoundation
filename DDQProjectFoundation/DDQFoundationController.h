@@ -83,6 +83,32 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @return Custom Button
  */
 - (UIButton *)setRightBarButtonItemStyle:(DDQFoundationBarButtonStyle)style Content:(id)content;
+
+/**
+ 这是设置返回键和点击方法
+ 
+ @param frame 按钮的大小
+ @param style 按钮的类型
+ @param content 按钮的内容
+ @param sel 按钮的点击事件
+ */
+- (void)foundation_setLeftBackItemFrame:(CGRect)frame Style:(DDQFoundationBarButtonStyle)style Content:(id)content Selector:(_Nullable SEL)sel;
+
+/**
+ 默认的点击事件
+ */
+- (void)foundation_leftItemSelectedWithCustomButton:(UIButton *)button;//leftItem default SEL
+
+/**
+ 创建一个右边按键点击事件
+ 
+ @param frame 按钮的大小
+ @param style 按钮的显示类型
+ @param content 按钮的显示内容
+ @param sel 点击事件
+ */
+- (void)foundation_setRightItemFrame:(CGRect)frame Style:(DDQFoundationBarButtonStyle)style Content:(id)content Selector:(SEL)sel;
+
 @end
 
 @interface DDQFoundationController (DDQFoundationRefreshConfig)
@@ -128,11 +154,6 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
 @interface DDQFoundationController (DDQFoundationNetRequest)
 
 /**
- 网络监控
- */
-@property (nonatomic, strong) AFNetworkReachabilityManager *foundation_reachability;
-
-/**
  jsonResponse
  */
 @property (nonatomic, assign) BOOL foundation_jsonResponse;
@@ -143,13 +164,6 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @param field 请求头参数
  */
 - (void)foundation_setHttpField:(NSDictionary *)field;
-
-/**
- 检查当前网络状况
- 
- @param result 检查结果
- */
-- (void)foundation_checkUserNetStatus:(void(^)(AFNetworkReachabilityStatus status, AFNetworkReachabilityManager *manager))result;
 
 /**
  当前网络状况发生改变
@@ -207,7 +221,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
 @optional
 
 /**
- 有时候需要指定HUD的父视图
+ 指定HUD的父视图
  */
 - (UIView *)foundation_HUDSuperView;
 
@@ -236,6 +250,51 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @return hud的实例
  */
 - (MBProgressHUD *)alertHUDWithMode:(MBProgressHUDMode)mode Text:(nullable NSString *)text Delegate:(nullable id<MBProgressHUDDelegate>)delegate;
+
+@end
+
+typedef BOOL(^_Nullable DDQFoundationRequestHandle)(_Nullable id response, int code);
+typedef void(^_Nullable DDQFoundationRequestAlertHandle)(int code);
+
+@interface DDQFoundationController (DDQFoundationRequestHandle)
+/**
+ 处理POST请求及HUD的显示
+
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param handle 请求的结果
+ @param alert 当HUD隐藏后的回调
+ */
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert;
+
+/**
+ 处理POST请求及HUD的显示
+
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param handle 请求的结果
+ */
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle;
+
+/**
+ 处理GET请求及HUD的显示
+
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param handle 请求的结果
+ @param alert 当HUD隐藏后的回调
+ */
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert;
+
+/**
+ 处理GET请求及HUD的显示
+ 
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param handle 请求的结果
+ */
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle;
+
 @end
 
 @interface DDQFoundationController (DDQFoundationUserAuthority)
@@ -252,6 +311,45 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  跳转到本app的系统设置页
  */
 + (void)foundation_gotoAppSystemSet;
+@end
+
+@interface DDQFoundationController (DDQFoundationCheckContent)
+
+/**
+ 检查手机号的准确性
+ */
+- (BOOL)foundation_checkPhone:(NSString *)phone;
+
+/**
+ 检查验证码的准确性
+ */
+- (BOOL)foundation_checkMessageCode:(NSString *)code;
+
+/**
+ 检查邮箱的准确性
+ */
+- (BOOL)foundation_checkEmail:(NSString *)mail;
+
+@end
+
+@interface DDQFoundationController (DDQFoundationTool)
+
+/**
+ 获取当前的时间
+ 
+ @param format YMDHSs
+ */
+- (NSString *)foundation_getCurrentDateWithFormat:(NSString *)format date:(NSDate *)date;
+
+/**
+ 压缩图片
+ 
+ @param image 图片
+ @param scale 比例
+ @return 新的图片
+ */
+- (UIImage *)foundation_compressionImageWithImage:(UIImage *)image Scale:(float)scale;
+
 @end
 
 UIKIT_EXTERN DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc; //网络请求错误后的错误描述

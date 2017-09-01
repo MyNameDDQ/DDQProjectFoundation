@@ -14,13 +14,10 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
-@interface DDQFoundationController ()<UIGestureRecognizerDelegate> {
-    
-    AFNetworkReachabilityManager *_reachabilityManager;
-}
+@interface DDQFoundationController ()<UIGestureRecognizerDelegate>
 
 @property (nonatomic, copy) NSDictionary *httpField;
-
+@property (nonatomic, assign) BOOL json;
 @end
 
 @implementation DDQFoundationController
@@ -43,11 +40,13 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     //内容类型判断
     if (style == DDQFoundationBarButtonText) {
         
+        NSAssert([content isKindOfClass:[NSString class]], @"内容的类型和按钮Style不符");
         [customButton setTitle:(NSString *)content forState:UIControlStateNormal];
         leftItem = [[UIBarButtonItem alloc] initWithCustomView:customButton];
     } else {
         
-        [customButton setBackgroundImage:(UIImage *)content forState:UIControlStateNormal];
+        NSAssert([content isKindOfClass:[UIImage class]], @"内容的类型和按钮Style不符");
+        [customButton setImage:(UIImage *)content forState:UIControlStateNormal];
         leftItem = [[UIBarButtonItem alloc] initWithCustomView:customButton];
     }
     
@@ -59,7 +58,6 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     [itemArray addObject:leftItem];
     [self.navigationItem setLeftBarButtonItems:itemArray.copy animated:YES];
     
-    
     return customButton;
 }
 
@@ -70,11 +68,13 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     //内容类型判断
     if (style == DDQFoundationBarButtonText) {
         
+        NSAssert([content isKindOfClass:[NSString class]], @"内容的类型和按钮Style不符");
         [customButton setTitle:(NSString *)content forState:UIControlStateNormal];
         rightItem = [[UIBarButtonItem alloc] initWithCustomView:customButton];
     } else {
         
-        [customButton setBackgroundImage:(UIImage *)content forState:UIControlStateNormal];
+        NSAssert([content isKindOfClass:[UIImage class]], @"内容的类型和按钮Style不符");
+        [customButton setImage:(UIImage *)content forState:UIControlStateNormal];
         rightItem = [[UIBarButtonItem alloc] initWithCustomView:customButton];
     }
     
@@ -95,6 +95,29 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     [self.navigationItem setRightBarButtonItems:itemArray.copy animated:YES];
     
     return customButton;
+}
+
+- (void)foundation_setLeftBackItemFrame:(CGRect)frame Style:(DDQFoundationBarButtonStyle)style Content:(id)content Selector:(SEL)sel {
+
+    UIButton *button = [self setLeftBarButtonItemStyle:style Content:content];
+    button.frame = frame;
+    if (sel) {
+        [button addTarget:self action:sel forControlEvents:UIControlEventTouchUpInside];
+    } else {
+        [button addTarget:self action:@selector(foundation_leftItemSelectedWithCustomButton:) forControlEvents:UIControlEventTouchUpInside];
+    }
+}
+
+- (void)foundation_leftItemSelectedWithCustomButton:(UIButton *)button {
+
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)foundation_setRightItemFrame:(CGRect)frame Style:(DDQFoundationBarButtonStyle)style Content:(id)content Selector:(SEL)sel {
+
+    UIButton *button = [self setRightBarButtonItemStyle:style Content:content];
+    button.frame = frame;
+    [button addTarget:self action:sel forControlEvents:UIControlEventTouchUpInside];
 }
 @end
 
@@ -199,33 +222,14 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
 
 @implementation DDQFoundationController (DDQFoundationNetRequest)
 
-static const char *response = "com.ddq.netResponse";
 - (void)setFoundation_jsonResponse:(BOOL)foundation_jsonResponse {
-    objc_setAssociatedObject(self, response, @(foundation_jsonResponse), OBJC_ASSOCIATION_RETAIN);
+
+    self.json = foundation_jsonResponse;
 }
 
 - (BOOL)foundation_jsonResponse {
-    
-    NSNumber *number = objc_getAssociatedObject(self, response);
-    if (number) {
-        return number.boolValue;
-    } else {
-        return NO;
-    }
-}
 
-- (void)setFoundation_reachability:(AFNetworkReachabilityManager *)foundation_reachability {
-    
-    _reachabilityManager = foundation_reachability;
-}
-
-- (AFNetworkReachabilityManager *)foundation_reachability {
-    
-    if (!_reachabilityManager) {
-        _reachabilityManager = [AFNetworkReachabilityManager sharedManager];
-        [_reachabilityManager startMonitoring];
-    }
-    return _reachabilityManager;
+    return self.json;
 }
 
 - (void)foundation_setHttpField:(NSDictionary *)field {
@@ -233,15 +237,9 @@ static const char *response = "com.ddq.netResponse";
     self.httpField = field;
 }
 
-- (void)foundation_checkUserNetStatus:(void (^)(AFNetworkReachabilityStatus, AFNetworkReachabilityManager * _Nonnull))result {
-    
-    AFNetworkReachabilityManager *reachbility = [AFNetworkReachabilityManager sharedManager];
-    [reachbility startMonitoring];
-    
-    if (result) {
-        result(reachbility.networkReachabilityStatus, reachbility);
-        [reachbility stopMonitoring];
-    }
+- (NSDictionary *)httpField {
+
+    return self.httpField;
 }
 
 - (void)foundation_checkUserNetChange:(void (^)(AFNetworkReachabilityStatus, AFNetworkReachabilityManager * _Nonnull))result {
@@ -470,6 +468,167 @@ static const char *HUDKey = "com.ddq.foundation.defaultHUD";
 }
 @end
 
+@implementation DDQFoundationController (DDQFoundationRequestHandle)
+
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle {
+
+    [self foundation_processNetPOSTRequestWithUrl:url Param:param WhenHUDHidden:handle AfterAlert:nil];
+}
+
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert {
+
+    [self.foundation_hud showAnimated:YES];
+    
+    DDQWeakObject(self);
+    [self foundation_POSTRequestWithUrl:url Param:param Success:^(id  _Nullable result) {
+        
+        int netCode = [result[@"result"] intValue];
+        NSString *netMessage = result[@"message"];
+        
+        if (handle) {
+            
+            BOOL isShow = handle(result, netCode);//数据处理完成
+            
+            [weakObjc.foundation_hud hideAnimated:YES afterDelay:0.2];
+            
+            //检查错误是否提示错误信息
+            if (isShow) {//提示消息
+                weakObjc.foundation_hud.completionBlock = ^{
+                    
+                    MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
+                    alertHUD.label.text = netMessage;
+                    alertHUD.mode = MBProgressHUDModeText;
+                    alertHUD.removeFromSuperViewOnHide = YES;
+                    
+                    [alertHUD hideAnimated:YES afterDelay:1.2];
+                    alertHUD.completionBlock = ^{
+                        
+                        if (alert) {
+                            weakObjc.foundation_hud.completionBlock = nil;
+                            alert(netCode);
+                        }
+                    };
+                };
+            }
+        }
+    } Failure:^(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull errDic) {
+        
+        if (handle) {
+            
+            BOOL isShow = handle(nil, DDQFoundationRequestFailure);//数据处理完成
+            
+            [weakObjc.foundation_hud hideAnimated:YES afterDelay:0.2];
+            //检查错误是否提示错误信息
+            if (isShow) {//提示消息
+                weakObjc.foundation_hud.completionBlock = ^{
+                    
+                    MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
+                    alertHUD.label.text = errDic[DDQFoundationRequestFailureDesc];
+                    alertHUD.mode = MBProgressHUDModeText;
+                    alertHUD.removeFromSuperViewOnHide = YES;
+                    
+                    [alertHUD hideAnimated:YES afterDelay:1.2];
+                    alertHUD.completionBlock = ^{
+                        
+                        if (alert) {
+                            weakObjc.foundation_hud.completionBlock = nil;
+                            alert(DDQFoundationRequestFailure);
+                        }
+                    };
+                };
+            }
+        }
+    }];
+}
+
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle {
+
+    [self foundation_processNetGETRequestWithUrl:url Param:param WhenHUDHidden:handle AfterAlert:nil];
+}
+
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert {
+
+    [self.foundation_hud showAnimated:YES];
+    
+    DDQWeakObject(self);
+    [self foundation_GETRequestWithUrl:url Param:param Success:^(id  _Nullable result) {
+        
+        int netCode = [result[@"result"] intValue];
+        NSString *netMessage = result[@"message"];
+        
+        if (handle) {
+            
+            BOOL isShow = handle(result, netCode);//数据处理完成
+            
+            [weakObjc.foundation_hud hideAnimated:YES afterDelay:0.2];
+            
+            //检查错误是否提示错误信息
+            if (isShow) {//提示消息
+                weakObjc.foundation_hud.completionBlock = ^{
+                    
+                    MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
+                    alertHUD.label.text = netMessage;
+                    alertHUD.mode = MBProgressHUDModeText;
+                    alertHUD.removeFromSuperViewOnHide = YES;
+                    
+                    [alertHUD hideAnimated:YES afterDelay:1.2];
+                    alertHUD.completionBlock = ^{
+                        
+                        if (alert) {
+                            alert(netCode);
+                        }
+                        if (weakObjc.foundation_hud.completionBlock) {
+                            weakObjc.foundation_hud.completionBlock = nil;
+                        }
+                    };
+                };
+            }
+        }
+    } Failure:^(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull errDic) {
+        
+        if (handle) {
+            
+            BOOL isShow = handle(nil, DDQFoundationRequestFailure);//数据处理完成
+            
+            [weakObjc.foundation_hud hideAnimated:YES afterDelay:0.2];
+            //检查错误是否提示错误信息
+            if (isShow) {//提示消息
+                weakObjc.foundation_hud.completionBlock = ^{
+                    
+                    MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
+                    alertHUD.label.text = errDic[DDQFoundationRequestFailureDesc];
+                    alertHUD.mode = MBProgressHUDModeText;
+                    alertHUD.removeFromSuperViewOnHide = YES;
+                    
+                    [alertHUD hideAnimated:YES afterDelay:1.2];
+                    alertHUD.completionBlock = ^{
+                        
+                        if (alert) {
+                            alert(DDQFoundationRequestFailure);
+                        }
+                        if (weakObjc.foundation_hud.completionBlock) {
+                            weakObjc.foundation_hud.completionBlock = nil;
+                        }
+                    };
+                };
+            }
+        }
+    }];
+}
+
+- (UIView *)foundation_getHUDSuperView {
+    
+    UIView *superView = nil;
+    if ([self respondsToSelector:@selector(foundation_HUDSuperView)]) {
+        superView = [self performSelector:@selector(foundation_HUDSuperView)];
+    } else {
+        superView = self.view;
+    }
+    return superView;
+}
+
+@end
+
 @implementation DDQFoundationController (DDQFoundationUserAuthority)
 
 + (NSError *)foundation_checkUserAuthorityWithType:(DDQFoundationAuthorityType)type {
@@ -500,17 +659,17 @@ static const char *HUDKey = "com.ddq.foundation.defaultHUD";
         
         if ([HKHealthStore isHealthDataAvailable]) {
             
-            error = [NSError errorWithDomain:@"该设备不支持访问健康" code:DDQFoundationErrorNoCamera userInfo:nil];
+            error = [NSError errorWithDomain:@"该设备不支持访问健康" code:DDQFoundationErrorHealthKitNotUse userInfo:nil];
             return error;
         }
         return error;
     } else if (type == DDQFoundationAuthorityPhotoLibary) {
         
-#if (__IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_9_0)
+#if (__IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_8_0)
         PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
         if (status == PHAuthorizationStatusRestricted || status == PHAuthorizationStatusDenied) {
             
-            error = [NSError errorWithDomain:@"无法访问您的相册" code:DDQFoundationErrorNoCamera userInfo:nil];
+            error = [NSError errorWithDomain:@"无法访问您的相册" code:DDQFoundationErrorPhotoLibaryNotUse userInfo:nil];
             return error;
         }
         
@@ -519,7 +678,7 @@ static const char *HUDKey = "com.ddq.foundation.defaultHUD";
         
         if (status == ALAuthorizationStatusRestricted || status == ALAuthorizationStatusDenied) {
             
-            error = [NSError errorWithDomain:@"无法访问您的相册" code:DDQFoundationErrorNoCamera userInfo:nil];
+            error = [NSError errorWithDomain:@"无法访问您的相册" code:DDQFoundationErrorPhotoLibaryNotUse userInfo:nil];
             return error;
         }
 #endif
@@ -533,4 +692,63 @@ static const char *HUDKey = "com.ddq.foundation.defaultHUD";
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
     
 }
+@end
+
+@implementation DDQFoundationController (DDQFoundationCheckContent)
+
+- (BOOL)foundation_checkPhone:(NSString *)phone {
+    
+    BOOL isPhone = NO;
+    if (phone.length != 11) {
+        return isPhone;
+    }
+    
+    NSString *rexStr = @"[1][3578]\\d{9}";
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", rexStr];
+    isPhone = [predicate evaluateWithObject:phone];
+    return isPhone;
+}
+
+- (BOOL)foundation_checkEmail:(NSString *)mail {
+    
+    BOOL isEmail = NO;
+    
+    NSString *rexStr = @"^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$";
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", rexStr];
+    isEmail = [predicate evaluateWithObject:mail];
+    return isEmail;
+}
+
+- (BOOL)foundation_checkMessageCode:(NSString *)code {
+    
+    NSScanner *scanner = [[NSScanner alloc] initWithString:code];
+    int value;
+    BOOL isInt = [scanner scanInt:&value];
+    return isInt;
+}
+
+@end
+
+@implementation DDQFoundationController (DDQFoundationTool)
+
+- (NSString *)foundation_getCurrentDateWithFormat:(NSString *)format date:(NSDate *)date {
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:format];
+    
+    return [formatter stringFromDate:date];
+}
+
+- (UIImage *)foundation_compressionImageWithImage:(UIImage *)image Scale:(float)scale {
+    
+    //图片压缩
+    CGSize imageSize = CGSizeMake(image.size.width * 0.5, image.size.height * 0.5);
+    UIGraphicsBeginImageContext(imageSize);
+    CGRect imageRect = CGRectMake(0.0, 0.0, imageSize.width, imageSize.height);
+    [image drawInRect:imageRect];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
+}
+
 @end

@@ -7,14 +7,15 @@
 
 typedef NS_ENUM(NSUInteger, DDQFoundationRateDeviceVersion) {
     
-    DDQFoundationRateDevice_iPhone4s,
-    DDQFoundationRateDevice_iPhone5,
-    DDQFoundationRateDevice_iPhone6,
-    DDQFoundationRateDevice_iPhone6P,
+    DDQFoundationRateDevice_unknown,    //不是iPhone设备(不支持2G,3GS)
+    DDQFoundationRateDevice_iPhone4,    //4屏幕比例大小(包含：4s)
+    DDQFoundationRateDevice_iPhone5,    //5屏幕比例大小(包含：5,5c,5s,SE)
+    DDQFoundationRateDevice_iPhone6,    //6屏幕比例大小(包含：6,7)
+    DDQFoundationRateDevice_iPhone6P,   //6p屏幕比例大小(包含：6p,7p)
 };
 
 struct DDQRateSet {
-
+    
     CGFloat widthRate;
     CGFloat heightRate;
 };
@@ -33,6 +34,11 @@ typedef struct DDQRateSet DDQRateSet;
  @param version 以什么设备为比例基础
  @return 宽高比
  */
-- (DDQRateSet)view_getCurrentDeviceRateWithVersion:(DDQFoundationRateDeviceVersion)version;
++ (DDQRateSet)view_getCurrentDeviceRateWithVersion:(DDQFoundationRateDeviceVersion)version;
+
+/**
+ 获取当前设备的型号
+ */
++ (DDQFoundationRateDeviceVersion)view_getDeviceVersion;
 
 @end
