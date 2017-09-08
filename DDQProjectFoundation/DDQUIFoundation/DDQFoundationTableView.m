@@ -8,7 +8,6 @@
 
 #import "DDQFoundationTableView.h"
 
-#import "DDQFoundationHeader.h"
 #import "DDQFoundationTableViewLayout.h"
 
 @interface DDQFoundationTableView ()
@@ -50,11 +49,11 @@
         
         for (NSString *identifier in dataDic.allKeys) {
             
-            self.tableView_layout.layout_loadFromNib?[self registerNib:kFindNib(dataDic[identifier]) forCellReuseIdentifier:identifier]:[self registerClass:dataDic[identifier] forCellReuseIdentifier:identifier];
+            self.tableView_layout.layout_loadFromNib?[self registerNib:[UINib nibWithNibName:NSStringFromClass(dataDic[identifier]) bundle:nil] forCellReuseIdentifier:identifier]:[self registerClass:dataDic[identifier] forCellReuseIdentifier:identifier];
         }
     } else {
         
-        self.tableView_layout.layout_loadFromNib?[self registerNib:kFindNib(self.tableView_layout.layout_cellClass) forCellReuseIdentifier:self.tableView_layout.layout_cellIdentifier]:[self registerClass:self.tableView_layout.layout_cellClass forCellReuseIdentifier:self.tableView_layout.layout_cellIdentifier];
+        self.tableView_layout.layout_loadFromNib?[self registerNib:[UINib nibWithNibName:NSStringFromClass(self.tableView_layout.layout_cellClass) bundle:nil] forCellReuseIdentifier:self.tableView_layout.layout_cellIdentifier]:[self registerClass:self.tableView_layout.layout_cellClass forCellReuseIdentifier:self.tableView_layout.layout_cellIdentifier];
     }
     
     if (!self.delegate) self.delegate = self;
