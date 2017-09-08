@@ -18,4 +18,7 @@ Pod::Spec.new do |s|
   s.dependency 'MBProgressHUD'
   s.dependency 'WebViewJavascriptBridge', '~> 4.1.5'
 
+  s.subspec 'DDQUIFoundation' do |ui|
+     ui.source_files = 'DDQProjectFoundation/DDQUIFoundation/DDQFoundation{TableView,TableViewLayout}.{h,m}'
+  end
 end

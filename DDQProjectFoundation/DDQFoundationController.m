@@ -237,11 +237,6 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     self.httpField = field;
 }
 
-- (NSDictionary *)httpField {
-
-    return self.httpField;
-}
-
 - (void)foundation_checkUserNetChange:(void (^)(AFNetworkReachabilityStatus, AFNetworkReachabilityManager * _Nonnull))result {
     
     AFNetworkReachabilityManager *reachbility = [AFNetworkReachabilityManager sharedManager];
