@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'DDQProjectFoundation'
-  s.version      = '1.1.6'
+  s.version      = '1.1.7'
   s.ios.deployment_target = '8.0'
   s.summary      = 'Easy Inherit'
   s.homepage     = 'https://github.com/MyNameDDQ/DDQProjectFoundation'
@@ -20,11 +20,15 @@ Pod::Spec.new do |s|
   s.dependency 'WebViewJavascriptBridge', '~> 4.1.5'
 
   s.subspec 'DDQUIFoundation' do |ui|
-     ui.source_files = 'DDQProjectFoundation/DDQUIFoundation/*.h'
+
+     ui.source_files = 'DDQProjectFoundation/DDQUIFoundation/*.{h,m}'
+
   end
 
   s.subspec 'DDQCategoryFoundation' do |cat|
-    cat.source_files = 'DDQProjectFoundation/DDQCategoryFoundation/*.h'
+
+    cat.source_files = 'DDQProjectFoundation/DDQCategoryFoundation/*.{h,m}'
+
   end
 
 end
