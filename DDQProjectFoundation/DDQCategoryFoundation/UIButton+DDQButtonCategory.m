@@ -10,6 +10,10 @@
 
 @implementation UIButton (DDQButtonCategory)
 
+DDQButtonBeginSourceKey const DDQButtonBeginTitle = @"com.button.beginTitle";
+DDQButtonBeginSourceKey const DDQButtonBeginTextColor = @"com.button.beginTextColor";
+DDQButtonBeginSourceKey const DDQButtonBeginBackgroundColor = @"com.button.backgroundColor";
+
 - (void)button_countDownWithInterval:(NSTimeInterval)interval totalTime:(float)total comletion:(nonnull void (^)(BOOL, NSDictionary * _Nullable))completion {
 
     __block float totalTime = total;

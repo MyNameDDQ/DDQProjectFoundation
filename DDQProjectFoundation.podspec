@@ -21,13 +21,15 @@ Pod::Spec.new do |s|
 
   s.subspec 'DDQUIFoundation' do |ui|
 
-     ui.source_files = 'DDQProjectFoundation/DDQUIFoundation/*.{h,m}'
+    ui.source_files = 'DDQProjectFoundation/DDQUIFoundation'
+    ui.public_header_files = 'DDQProjectFoundation/DDQUIFoundation/*.h'
 
   end
 
   s.subspec 'DDQCategoryFoundation' do |cat|
 
-    cat.source_files = 'DDQProjectFoundation/DDQCategoryFoundation/*.{h,m}'
+    cat.source_files = 'DDQProjectFoundation/DDQCategoryFoundation'
+    cat.public_header_files = 'DDQProjectFoundation/DDQCategoryFoundation/*.h'
 
   end
 
