@@ -5,8 +5,6 @@
 
 #import "DDQFoundationController.h"
 
-#import <MJRefresh/MJRefresh.h>
-
 #import <objc/runtime.h>
 
 #import <Photos/Photos.h>
