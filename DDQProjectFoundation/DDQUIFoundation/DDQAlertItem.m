@@ -1,19 +1,21 @@
 //
-//  DDQFoundationAlertItem.m
+//  DDQAlertItem.m
+//  AFNetworking
 //
-//  Created by 我叫咚咚枪 on 2017/10/4.
+//  Created by 我叫咚咚枪 on 2017/10/7.
 //
 
-#import "DDQFoundationAlertItem.h"
+#import "DDQAlertItem.h"
 
-@interface DDQFoundationAlertItem ()
+@interface DDQAlertItem ()
 
 @property (nonatomic, strong) UILabel *item_titleLabel;
 @property (nonatomic, strong) UIView *item_lineView;
 @property (nonatomic, assign) DDQAlertItemStyle item_style;
+
 @end
 
-@implementation DDQFoundationAlertItem
+@implementation DDQAlertItem
 
 + (instancetype)alertItemWithStyle:(DDQAlertItemStyle)style {
     
@@ -80,4 +82,3 @@
 }
 
 @end
-

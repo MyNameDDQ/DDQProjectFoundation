@@ -5,7 +5,8 @@
 
 #import <UIKit/UIKit.h>
 
-#import <DDQProjectFoundation/DDQFoundationHeader.h>
+#import "DDQDependencyHeader.h"
+#import "DDQFoundationDefine.h"
 
 NS_ASSUME_NONNULL_BEGIN
 typedef NSString * DDQFoundationControllerSourceKey;       //数据源标识

@@ -1,11 +1,12 @@
 //
 //  DDQQRScanController.m
 //
-//  Created by 我叫咚咚枪 on 2017/10/4.
+//  Created by 我叫咚咚枪 on 2017/10/7.
 //
 
 #import "DDQQRScanController.h"
 
+#import "DDQQRScanPreviewView.h"
 #import <AVFoundation/AVFoundation.h>
 
 @interface DDQQRScanController ()<AVCaptureMetadataOutputObjectsDelegate>
@@ -18,6 +19,7 @@
 @property (nonatomic, strong) dispatch_block_t scan_block;
 
 @end
+
 
 @implementation DDQQRScanController
 
@@ -142,7 +144,7 @@
     if ([self.scan_captureSession canAddOutput:captureOutput]) {
         [self.scan_captureSession addOutput:captureOutput];
     }
-
+    
     captureOutput.metadataObjectTypes = self.scan_supportTypes;
     
     AVCaptureVideoPreviewLayer *captureLayer =[AVCaptureVideoPreviewLayer layerWithSession:self.scan_captureSession];
@@ -167,7 +169,7 @@
         [self.delegate scan_getScanResult:codeValue];
     }
     //可以查看 https://github.com/TUNER88/iOSSystemSoundsLibrary
-//    AudioServicesPlaySystemSound(4095);
+    //    AudioServicesPlaySystemSound(4095);
 }
 
 @end

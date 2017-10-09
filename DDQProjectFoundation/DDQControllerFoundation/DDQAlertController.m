@@ -1,12 +1,15 @@
 //
-//  DDQFoundationAlertController.m
+//  DDQAlertController.m
 //
-//  Created by 我叫咚咚枪 on 2017/10/4.
+//  Created by 我叫咚咚枪 on 2017/10/7.
 //
 
-#import "DDQFoundationAlertController.h"
+#import "DDQAlertController.h"
 
-@interface DDQFoundationAlertController ()<DDQFoundationAlertItemDelegate>
+#import "DDQAlertItem.h"
+#import "UIView+DDQSimplyGetViewProperty.h"
+
+@interface DDQAlertController ()<DDQAlertItemDelegate>
 
 @property (nonatomic, strong, readwrite) UIView *alert_contentView;
 @property (nonatomic, strong, readwrite) UIView *alert_headerView;
@@ -14,12 +17,12 @@
 @property (nonatomic, strong) UILabel *alert_titleLabel;
 @property (nonatomic, strong) UILabel *alert_messageLabel;
 @property (nonatomic, assign) DDQAlertControllerStyle alert_style;
-@property (nonatomic, strong) NSMutableArray<DDQFoundationAlertItem *> *alert_itemContainer;
+@property (nonatomic, strong) NSMutableArray<DDQAlertItem *> *alert_itemContainer;
 @property (nonatomic, strong) DDQAlertItemHandler alert_handler;
 
 @end
 
-@implementation DDQFoundationAlertController
+@implementation DDQAlertController
 
 + (instancetype)alertControllerWithTitle:(NSString *)title message:(NSString *)message alertStyle:(DDQAlertControllerStyle)style {
     
@@ -88,7 +91,7 @@
         self.alert_verLineView.frame = CGRectMake(contentW * 0.5 - 0.5, CGRectGetMaxY(self.alert_headerView.frame), 1.0, itemH);
         for (NSInteger index = 0; index < self.alert_itemContainer.count; index++) {
             
-            DDQFoundationAlertItem *item = self.alert_itemContainer[index];
+            DDQAlertItem *item = self.alert_itemContainer[index];
             item.frame = CGRectMake(itemX, itemY, contentW * 0.5, itemH);
             itemX = CGRectGetMaxX(item.frame);
         }
@@ -96,7 +99,7 @@
         
         for (NSInteger index = 0; index < self.alert_itemContainer.count; index++) {
             
-            DDQFoundationAlertItem *item = self.alert_itemContainer[index];
+            DDQAlertItem *item = self.alert_itemContainer[index];
             if ((self.alert_style == DDQAlertControllerStyleSheetExceptHeader || self.alert_style == DDQAlertControllerStyleSheet) && item == self.alert_itemContainer.lastObject) {
                 
                 [item removeFromSuperview];
@@ -105,7 +108,6 @@
                 item.frame = CGRectMake(contentX + contentX * 0.5, self.alert_contentView.y + self.alert_contentView.height + contentX, contentW - contentX + contentX * 0.5, itemH - contentX);
                 
                 item.layer.cornerRadius = 5.0;
-                item.backgroundColor = [UIColor whiteColor];
                 item.layer.masksToBounds = YES;
             } else {
                 
@@ -134,7 +136,7 @@
     self.alert_verLineView = [[UIView alloc] init];
     [self.alert_contentView addSubview:self.alert_verLineView];
     self.alert_verLineView.hidden = YES;
-    self.alert_verLineView.backgroundColor =kSetColor(235.0, 235.0, 235.0, 1.0);
+    self.alert_verLineView.backgroundColor = kSetColor(235.0, 235.0, 235.0, 1.0);
     
     self.alert_titleLabel = [[UILabel alloc] init];
     [self.alert_headerView addSubview:self.alert_titleLabel];
@@ -154,7 +156,7 @@
     
     if (setup && setup()) {
         
-        DDQFoundationAlertItem *alertItem = setup();
+        DDQAlertItem *alertItem = setup();
         alertItem.delegate = self;
         [self.alert_contentView addSubview:alertItem];
         [self.alert_itemContainer addObject:alertItem];
@@ -163,10 +165,11 @@
 }
 
 #pragma mark - Item Delegate
-- (void)alert_itemSelectedWithItem:(DDQFoundationAlertItem *)item {
+- (void)alert_itemSelectedWithItem:(DDQAlertItem *)item {
     
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
     if (self.alert_handler) self.alert_handler(item);
 }
 
 @end
+

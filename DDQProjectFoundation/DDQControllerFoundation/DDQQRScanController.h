@@ -1,14 +1,13 @@
 //
 //  DDQQRScanController.h
 //
-//  Created by 我叫咚咚枪 on 2017/10/4.
+//  Created by 我叫咚咚枪 on 2017/10/7.
 //
 
-#import <DDQProjectFoundation/DDQFoundationController.h>
-
-#import "DDQQRScanPreviewView.h"
+#import "DDQFoundationController.h"
 
 NS_ASSUME_NONNULL_BEGIN
+@class DDQQRScanPreviewView;
 @protocol DDQQRScanControllerDelegate;
 /**
  二维码扫描
@@ -52,4 +51,3 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
-

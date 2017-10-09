@@ -1,7 +1,8 @@
 //
-//  DDQFoundationAlertItem.h
+//  DDQAlertItem.h
+//  AFNetworking
 //
-//  Created by 我叫咚咚枪 on 2017/10/4.
+//  Created by 我叫咚咚枪 on 2017/10/7.
 //
 
 #import <UIKit/UIKit.h>
@@ -12,11 +13,12 @@ typedef NS_ENUM(NSUInteger, DDQAlertItemStyle) {
     DDQAlertItemStyleDefault,       //一个默认的类型,一个label
     DDQAlertItemStyleCustom,        //一个自定义的类型
 };
-@protocol DDQFoundationAlertItemDelegate;
+@protocol DDQAlertItemDelegate;
 /**
  AlertController的Item
  */
-@interface DDQFoundationAlertItem : UIView
+
+@interface DDQAlertItem : UIView
 
 /**
  初始化方法
@@ -27,18 +29,20 @@ typedef NS_ENUM(NSUInteger, DDQAlertItemStyle) {
 
 @property (nonatomic, copy, nullable) NSString *item_title;//default @""
 @property (nonatomic, strong, nullable) NSAttributedString *item_attrTitle;//default nil
-@property (nonatomic, weak, nullable) id <DDQFoundationAlertItemDelegate> delegate;
+@property (nonatomic, weak, nullable) id <DDQAlertItemDelegate> delegate;
+
 @end
 
-@protocol DDQFoundationAlertItemDelegate <NSObject>
+@protocol DDQAlertItemDelegate <NSObject>
 
 @optional
 
 /**
  Item被点击
  */
-- (void)alert_itemSelectedWithItem:(DDQFoundationAlertItem *)item;
+- (void)alert_itemSelectedWithItem:(DDQAlertItem *)item;
 
 @end
 
 NS_ASSUME_NONNULL_END
+

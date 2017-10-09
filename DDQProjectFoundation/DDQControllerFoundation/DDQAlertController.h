@@ -1,14 +1,14 @@
 //
-//  DDQFoundationAlertController.h
+//  DDQAlertController.h
 //
-//  Created by 我叫咚咚枪 on 2017/10/4.
+//  Created by 我叫咚咚枪 on 2017/10/7.
 //
 
-#import <DDQProjectFoundation/DDQFoundationController.h>
-
-#import "DDQFoundationAlertItem.h"
+#import "DDQFoundationController.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class DDQAlertItem;
 
 typedef NS_ENUM(NSUInteger, DDQAlertControllerStyle) {
     DDQAlertControllerStyleAlert,                    //类似于系统的Alert
@@ -16,13 +16,13 @@ typedef NS_ENUM(NSUInteger, DDQAlertControllerStyle) {
     DDQAlertControllerStyleSheet,                    //类似于系统的Sheet
     DDQAlertControllerStyleSheetExceptHeader,        //Sheet样式除去顶部的提示信息
 };
-typedef __kindof DDQFoundationAlertItem *(^_Nullable DDQAlertItemSetup)();
-typedef void(^_Nullable DDQAlertItemHandler)(DDQFoundationAlertItem *item);
+typedef __kindof DDQAlertItem *_Nullable(^_Nullable DDQAlertItemSetup)(void);
+typedef void(^_Nullable DDQAlertItemHandler)(DDQAlertItem *item);
 
 /**
  提示控制器
  */
-@interface DDQFoundationAlertController : DDQFoundationController
+@interface DDQAlertController : DDQFoundationController
 
 /**
  初始化方法
@@ -44,7 +44,7 @@ typedef void(^_Nullable DDQAlertItemHandler)(DDQFoundationAlertItem *item);
 
 /**
  添加一个Item
-
+ 
  @param setup 设置AlertItem
  @param handler Item的点击事件
  */
@@ -53,3 +53,4 @@ typedef void(^_Nullable DDQAlertItemHandler)(DDQFoundationAlertItem *item);
 @end
 
 NS_ASSUME_NONNULL_END
+

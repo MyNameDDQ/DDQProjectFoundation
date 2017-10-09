@@ -9,17 +9,13 @@
 #import "DDQFoundationModel.h"
 
 #import <objc/runtime.h>
-#import "DDQFoundationHeader.h"
+#import <MJExtension/MJExtension.h>
 
 @implementation DDQFoundationModel
+
 - (void)setValue:(id)value forKey:(NSString *)key {
     
     [super setValue:[self base_checkModelValue:value] forKey:key];
-}
-
-- (void)setValue:(id)value forUndefinedKey:(NSString *)key {
-    
-    DDQLog(@"Undefined key name = %@", key);
 }
 
 /**
