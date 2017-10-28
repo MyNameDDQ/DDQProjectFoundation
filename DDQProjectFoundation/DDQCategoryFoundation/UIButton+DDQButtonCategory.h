@@ -1,10 +1,7 @@
 //
 //  UIButton+DDQButtonCategory.h
-//  DDQProjectEdit
 //
-//  Created by 我叫咚咚枪 on 2017/9/11.
-//  Copyright © 2017年 我叫咚咚枪. All rights reserved.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
 
 #import <UIKit/UIKit.h>
 

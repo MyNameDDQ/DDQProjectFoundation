@@ -1,16 +1,18 @@
 //
 //  DDQQRScanController.m
 //
-//  Created by 我叫咚咚枪 on 2017/10/7.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
+
 
 #import "DDQQRScanController.h"
 
 #import "DDQQRScanPreviewView.h"
+#import "DDQAlertController.h"
+#import "DDQAlertItem.h"
 #import <AVFoundation/AVFoundation.h>
 
-@interface DDQQRScanController ()<AVCaptureMetadataOutputObjectsDelegate>
-{
+@interface DDQQRScanController ()<AVCaptureMetadataOutputObjectsDelegate> {
+    
     id _systemActiveObserver;
 }
 
@@ -86,6 +88,8 @@
     if (!self) return nil;
     
     self.scan_previewView = previewView;
+    self.scan_showAuthorityAlert = YES;
+    self.scan_alertController = [DDQAlertController alertControllerWithTitle:@"提示" message:@"" alertStyle:DDQAlertControllerStyleAlert];
     [self.view addSubview:previewView];
     return self;
 }
@@ -108,17 +112,27 @@
         DDQWeakObject(self);
         self.scan_block = dispatch_block_create(DISPATCH_BLOCK_BARRIER, ^{
             
-            UIAlertController *alerC = [UIAlertController alertControllerWithTitle:@"提示" message:authorityError.domain preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *actionOne = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            weakObjc.scan_alertController.alert_messageLabel.text = authorityError.domain;
+            [weakObjc.scan_alertController alert_addAlertItem:^__kindof DDQAlertItem * _Nullable{
+                
+                DDQAlertItem *leftItem = [DDQAlertItem alertItemWithStyle:DDQAlertItemStyleDefault];
+                leftItem.item_title = @"取消";
+                return leftItem;
+            } handler:^(DDQAlertItem * _Nonnull item) {
+                
                 [weakObjc.navigationController popViewControllerAnimated:YES];
             }];
-            UIAlertAction *acitonTwo = [UIAlertAction actionWithTitle:@"设置" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+            
+            [weakObjc.scan_alertController alert_addAlertItem:^__kindof DDQAlertItem * _Nullable{
+                
+                DDQAlertItem *rightItem = [DDQAlertItem alertItemWithStyle:DDQAlertItemStyleDefault];
+                rightItem.item_attrTitle = [[NSAttributedString alloc] initWithString:@"确定" attributes:@{NSForegroundColorAttributeName:[UIColor redColor], NSFontAttributeName:rightItem.item_font}];
+                return rightItem;
+            } handler:^(DDQAlertItem * _Nonnull item) {
+                
                 [DDQFoundationController foundation_gotoAppSystemSet];
             }];
-            [alerC addAction:actionOne];
-            [alerC addAction:acitonTwo];
-            alerC.view.tintColor = [UIColor blackColor];
-            [weakObjc presentViewController:alerC animated:YES completion:nil];
+            [weakObjc presentViewController:weakObjc.scan_alertController animated:YES completion:nil];
         });
         return NO;
     }

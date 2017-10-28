@@ -1,13 +1,13 @@
 //
 //  DDQQRScanController.h
 //
-//  Created by 我叫咚咚枪 on 2017/10/7.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
 
 #import "DDQFoundationController.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @class DDQQRScanPreviewView;
+@class DDQAlertController;
 @protocol DDQQRScanControllerDelegate;
 /**
  二维码扫描
@@ -20,6 +20,17 @@ NS_ASSUME_NONNULL_BEGIN
  @param previewView 二维码扫描的预览视图
  */
 - (instancetype)initWithPreviewView:(DDQQRScanPreviewView *)previewView;
+
+/**
+ 提不提示权限不足
+ */
+@property (nonatomic, assign) BOOL scan_showAuthorityAlert;//Default YES
+
+/**
+ 提示时的控制器
+ PS:当scan_showAuthorityAlert为YES时才不为空
+ */
+@property (nonatomic, strong) DDQAlertController *scan_alertController;
 
 @property (nonatomic, weak, nullable) id <DDQQRScanControllerDelegate> delegate;
 

@@ -1,10 +1,8 @@
 //
 //  DDQFoundationTableViewLayout.m
-//  Pods
 //
-//  Created by 我叫咚咚枪 on 2017/9/8.
-//
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
+
 
 #import "DDQFoundationTableViewLayout.h"
 

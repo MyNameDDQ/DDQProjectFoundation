@@ -28,5 +28,6 @@
 //工程控制器
 #import "DDQQRScanController.h"
 #import "DDQAlertController.h"
+#import "DDQNavigationController.h"
 
 #endif /* DDQFoundationHeader_h */

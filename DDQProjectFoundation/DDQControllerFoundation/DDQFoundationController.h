@@ -9,6 +9,7 @@
 #import "DDQFoundationDefine.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
 typedef NSString * DDQFoundationControllerSourceKey;       //数据源标识
 typedef NSString * DDQFoundationControllerCellIdentifier;  //cell的id标识
 typedef NSString * DDQFoundationRequestFailureKey;         //访问错误的描述

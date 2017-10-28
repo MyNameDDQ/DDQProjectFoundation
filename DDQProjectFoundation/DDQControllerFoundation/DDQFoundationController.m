@@ -12,6 +12,8 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
+#import "DDQAlertController.h"
+
 @interface DDQFoundationController ()<UIGestureRecognizerDelegate>
 
 @property (nonatomic, copy) NSDictionary *httpField;

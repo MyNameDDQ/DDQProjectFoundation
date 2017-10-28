@@ -1,8 +1,7 @@
 //
 //  DDQAlertController.h
 //
-//  Created by 我叫咚咚枪 on 2017/10/7.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
 
 #import "DDQFoundationController.h"
 
@@ -33,15 +32,18 @@ typedef void(^_Nullable DDQAlertItemHandler)(DDQAlertItem *item);
  */
 + (instancetype)alertControllerWithTitle:(nullable NSString *)title message:(nullable NSString *)message alertStyle:(DDQAlertControllerStyle)style;
 
-@property (nonatomic, copy, nullable) NSString *alert_title;//default @""
-@property (nonatomic, copy, nullable) NSString *alert_message;//default @""
-
-@property (nonatomic, strong, nullable) NSAttributedString *alert_attrTitle;//default nil
-@property (nonatomic, strong, nullable) NSAttributedString *alert_attrMessage;//default nil
+@property (nonatomic, strong) UILabel *alert_titleLabel;
+@property (nonatomic, strong) UILabel *alert_messageLabel;
 
 @property (nonatomic, strong, readonly) UIView *alert_contentView;//白底的ContentView
 @property (nonatomic, strong, readonly) UIView *alert_headerView;//headerView显示标题和消息
 
+/**
+ 注意只会在：DDQAlertControllerStyleSheet或者DDQAlertControllerStyleSheetExceptHeader才不为nil
+ */
+@property (nonatomic, strong, readonly) UIView *alert_footContentView;
+
+@property (nonatomic, copy, readonly) NSArray<DDQAlertItem *> *alert_items;
 /**
  添加一个Item
  
@@ -49,6 +51,11 @@ typedef void(^_Nullable DDQAlertItemHandler)(DDQAlertItem *item);
  @param handler Item的点击事件
  */
 - (void)alert_addAlertItem:(DDQAlertItemSetup)setup handler:(DDQAlertItemHandler)handler;
+
+/**
+ 更新当前的提示类型
+ */
+- (void)alert_updateControllerStyle:(DDQAlertControllerStyle)style;
 
 @end
 

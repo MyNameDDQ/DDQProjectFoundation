@@ -1,8 +1,7 @@
 //
 //  DDQDependencyHeader.h
 //
-//  Copyright © 2017年 我叫咚咚枪. All rights reserved.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
 
 #ifndef DDQDependencyHeader_h
 #define DDQDependencyHeader_h

@@ -1,9 +1,8 @@
 //
 //  DDQAlertItem.m
-//  AFNetworking
 //
-//  Created by 我叫咚咚枪 on 2017/10/7.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
+
 
 #import "DDQAlertItem.h"
 
@@ -30,6 +29,7 @@
     self.item_title = @"";
     self.item_attrTitle = nil;
     self.item_style = style;
+    self.item_font = [UIFont systemFontOfSize:17.0];
     [self item_layoutSubviews];
     return self;
 }
@@ -53,11 +53,14 @@
 
 - (void)item_layoutSubviews {
     
-    self.item_titleLabel = [[UILabel alloc] init];
-    [self addSubview:self.item_titleLabel];
-    self.item_titleLabel.textAlignment = NSTextAlignmentCenter;
-    self.item_titleLabel.textColor = [UIColor blackColor];
-    
+    if (self.item_style == DDQAlertItemStyleDefault) {
+        
+        self.item_titleLabel = [[UILabel alloc] init];
+        [self addSubview:self.item_titleLabel];
+        self.item_titleLabel.textAlignment = NSTextAlignmentCenter;
+        self.item_titleLabel.textColor = [UIColor blackColor];
+        self.item_titleLabel.font = self.item_font;
+    }
     self.item_lineView = [[UIView alloc] init];
     [self addSubview:self.item_lineView];
     CGFloat rate = 235.0 / 255.0;
@@ -75,7 +78,8 @@
     
     _item_attrTitle = item_attrTitle;
     
-    if (!item_attrTitle) {
+    if (item_attrTitle) {
+        
         self.item_titleLabel.text = @"";
         self.item_titleLabel.attributedText =  item_attrTitle;
     }

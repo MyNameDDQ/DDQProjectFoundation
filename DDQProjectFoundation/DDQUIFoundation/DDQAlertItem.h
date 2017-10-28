@@ -1,9 +1,7 @@
 //
 //  DDQAlertItem.h
-//  AFNetworking
 //
-//  Created by 我叫咚咚枪 on 2017/10/7.
-//
+//  Copyright © 2017年 DDQ. All rights reserved.
 
 #import <UIKit/UIKit.h>
 
@@ -29,6 +27,7 @@ typedef NS_ENUM(NSUInteger, DDQAlertItemStyle) {
 
 @property (nonatomic, copy, nullable) NSString *item_title;//default @""
 @property (nonatomic, strong, nullable) NSAttributedString *item_attrTitle;//default nil
+@property (nonatomic, strong, nullable) UIFont *item_font;//default system font size 17.0
 @property (nonatomic, weak, nullable) id <DDQAlertItemDelegate> delegate;
 
 @end
