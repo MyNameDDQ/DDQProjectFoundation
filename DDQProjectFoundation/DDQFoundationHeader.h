@@ -23,11 +23,14 @@
 #import "DDQFoundationTableViewLayout.h"
 
 #import "DDQAlertItem.h"
+#import "DDQTabBar.h"
+#import "DDQBarItem.h"
 #import "DDQQRScanPreviewView.h"
 
 //工程控制器
 #import "DDQQRScanController.h"
 #import "DDQAlertController.h"
 #import "DDQNavigationController.h"
+#import "DDQTabBarController.h"
 
 #endif /* DDQFoundationHeader_h */
