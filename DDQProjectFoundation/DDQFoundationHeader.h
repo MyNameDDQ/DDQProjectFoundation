@@ -26,11 +26,13 @@
 #import "DDQTabBar.h"
 #import "DDQBarItem.h"
 #import "DDQQRScanPreviewView.h"
+#import "DDQWebPagePlaceholderView.h"
 
 //工程控制器
 #import "DDQQRScanController.h"
 #import "DDQAlertController.h"
 #import "DDQNavigationController.h"
 #import "DDQTabBarController.h"
+#import "DDQWebPageController.h"
 
 #endif /* DDQFoundationHeader_h */
