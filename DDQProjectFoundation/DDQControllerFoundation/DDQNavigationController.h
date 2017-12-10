@@ -35,13 +35,14 @@ typedef NSString *DDQExcptionName;
 
 /**
  更改StatusBar的样式
-
+ 
  @param barStyle 样式类型
  */
-- (void)nav_upadteNavgationBarStyle:(UIStatusBarStyle)barStyle;
+- (void)nav_updateNavgationStatusBarStyle:(UIStatusBarStyle)barStyle;
 
 @end
 
 UIKIT_EXTERN DDQExcptionName const DDQInvalidArgumentException;    //错误参数类型
 
 NS_ASSUME_NONNULL_END
+

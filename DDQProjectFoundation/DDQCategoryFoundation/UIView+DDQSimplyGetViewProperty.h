@@ -10,8 +10,9 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRateDeviceVersion) {
     DDQFoundationRateDevice_unknown,    //不是iPhone设备(不支持2G,3GS)
     DDQFoundationRateDevice_iPhone4,    //4屏幕比例大小(包含：4s)
     DDQFoundationRateDevice_iPhone5,    //5屏幕比例大小(包含：5,5c,5s,SE)
-    DDQFoundationRateDevice_iPhone6,    //6屏幕比例大小(包含：6,7)
-    DDQFoundationRateDevice_iPhone6P,   //6p屏幕比例大小(包含：6p,7p)
+    DDQFoundationRateDevice_iPhone6,    //6屏幕比例大小(包含：6,7,8)
+    DDQFoundationRateDevice_iPhone6P,   //6p屏幕比例大小(包含：6p,7p,8p)
+    DDQFoundationRateDevice_iPhoneX,    //iPhoneX 5.8英寸屏
 };
 
 struct DDQRateSet {

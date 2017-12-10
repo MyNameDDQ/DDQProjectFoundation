@@ -34,5 +34,6 @@
 #import "DDQNavigationController.h"
 #import "DDQTabBarController.h"
 #import "DDQWebPageController.h"
+#import "DDQCityPickerController.h"
 
 #endif /* DDQFoundationHeader_h */

@@ -31,4 +31,8 @@
 
 #define DDQ_DEPRECATED(_available, _deprecated, ...)  NS_DEPRECATED_IOS(_available, _deprecated, __VA_ARGS__)
 
+#define DDQ_DEPRECATED_V(_available, _deprecated, __VA_ARGS__) NS_DEPRECATED_IOS(_available, _deprecated, __VA_ARGS__)
+
+#define DDQ_REQUIRES_SUPER __attribute__((objc_requires_super))
+
 #endif /* DDQFoundationDefine_h */

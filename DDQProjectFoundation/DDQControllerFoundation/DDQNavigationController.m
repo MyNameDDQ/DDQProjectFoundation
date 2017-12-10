@@ -17,12 +17,6 @@
 
 DDQExcptionName const DDQInvalidArgumentException = @"DDQExcption.invalidArgument";
 
-- (void)viewDidLoad {
-    
-    [super viewDidLoad];
-    
-}
-
 - (UIStatusBarStyle)preferredStatusBarStyle {
     
     return _barStyle;
@@ -61,10 +55,11 @@ DDQExcptionName const DDQInvalidArgumentException = @"DDQExcption.invalidArgumen
 }
 
 #pragma mark - Custom Method IMP
-- (void)nav_upadteNavgationBarStyle:(UIStatusBarStyle)barStyle {
+- (void)nav_updateNavgationStatusBarStyle:(UIStatusBarStyle)barStyle {
     
     _barStyle = barStyle;
     [self setNeedsStatusBarAppearanceUpdate];
 }
 
 @end
+

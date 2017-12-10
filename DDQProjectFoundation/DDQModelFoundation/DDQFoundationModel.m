@@ -11,29 +11,38 @@
 
 @implementation DDQFoundationModel
 
-- (void)setValue:(id)value forKey:(NSString *)key {
++ (instancetype)mj_objectWithKeyValues:(id)keyValues {
     
-    [super setValue:[self base_checkModelValue:value] forKey:key];
+    id object = [super mj_objectWithKeyValues:keyValues];
+    if ([object respondsToSelector:@selector(model_handlerPropertyList)]) {
+        [object performSelector:@selector(model_handlerPropertyList)];
+    }
+    return object;
 }
 
-/**
- 判断赋值是否为空
- 
- @param value 判断的值
- @return 处理后的结果
- */
-- (NSObject *)base_checkModelValue:(id)value {
-    
-    if (!value) {
-        
-        if ([value isKindOfClass:[NSObject class]]) {
-            return [[[value class] alloc] init];
-        } else {
-            return [[NSObject alloc] init];
-        }
-    }
-    return value;
-}
+//- (void)setValue:(id)value forKey:(NSString *)key {
+//    
+//    [super setValue:[self base_checkModelValue:value] forKey:key];
+//}
+//
+///**
+// 判断赋值是否为空
+// 
+// @param value 判断的值
+// @return 处理后的结果
+// */
+//- (NSObject *)base_checkModelValue:(id)value {
+//    
+//    if (!value || [value isKindOfClass:[NSNull class]]) {
+//        
+//        if ([value isKindOfClass:[NSObject class]]) {
+//            return [[[value class] alloc] init];
+//        } else {
+//            return [[NSObject alloc] init];
+//        }
+//    }
+//    return value;
+//}
 
 /**
  读取模型类中的所有属性名称
@@ -121,29 +130,28 @@ static NSString *const PropertyAttribute = @"JFModelAttrName";
         Class propertyClass = NSClassFromString(attrDic[PropertyClass]);
         if ([propertyClass isSubclassOfClass:[NSObject class]]) {//OC子类
             
-            NSString *propertyAttr = attrDic[PropertyAttribute];
-            if ([propertyAttr isEqualToString:@"C"]) {//copy
-                
-                NSSet *set = [self model_propertyAttrFollowProtocalWithClass:propertyClass];
-                
-                if ([set.allObjects containsObject:@"NSCopying"]) {//该类遵循NSCopying协议
-                    [self setValue:[[propertyClass alloc] init] forKey:remainedKey];
-                } else {//该类不支持NSCopying协议，但属性修饰词却是copy
-                    
-                    NSString *excTip = [NSString stringWithFormat:@"%@没有遵循NSCopying协议", propertyClass];
-                    NSException *exc = [NSException exceptionWithName:NSInvalidArgumentException reason:excTip userInfo:nil];
-                    [exc raise];
-                }
-            } else {//strong,weak
-                [self setValue:[[propertyClass alloc] init] forKey:remainedKey];
-            }
+//            NSString *propertyAttr = attrDic[PropertyAttribute];
+            [self setValue:[[propertyClass alloc] init] forKey:remainedKey];
+//            if ([propertyAttr isEqualToString:@"C"]) {//copy
+//
+//                NSSet *set = [self model_propertyAttrFollowProtocalWithClass:propertyClass];
+//
+//                if ([set.allObjects containsObject:@"NSCopying"]) {//该类遵循NSCopying协议
+//                    [self setValue:[[propertyClass alloc] init] forKey:remainedKey];
+//                } else {//该类不支持NSCopying协议，但属性修饰词却是copy
+//
+//                    NSString *excTip = [NSString stringWithFormat:@"%@没有遵循NSCopying协议", propertyClass];
+//                    NSException *exc = [NSException exceptionWithName:NSInvalidArgumentException reason:excTip userInfo:nil];
+//                    [exc raise];
+//                }
+//            } else {//strong,weak
+//            }
         } else {//基础数据类型
             
             //可不用实现，基础数据类型，为空时取值时0。而且MJ也做了相关处理
         }
     }
 }
-
 @end
 
 @implementation NSObject (DDQJFModelClass)

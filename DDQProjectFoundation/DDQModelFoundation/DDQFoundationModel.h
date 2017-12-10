@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /**
- 即返模型基类
+ 模型基类
  */
 @interface DDQFoundationModel : NSObject<DDQFoundationModelHandler>
 

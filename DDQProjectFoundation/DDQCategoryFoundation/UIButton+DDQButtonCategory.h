@@ -21,11 +21,11 @@ typedef NSString *DDQButtonBeginSourceKey;
  */
 - (void)button_countDownWithInterval:(NSTimeInterval)interval totalTime:(float)total comletion:(void(^)(BOOL finished, NSDictionary *_Nullable beginSource))completion;
 
-
 @end
 
 UIKIT_EXTERN DDQButtonBeginSourceKey const DDQButtonBeginTitle;
 UIKIT_EXTERN DDQButtonBeginSourceKey const DDQButtonBeginTextColor;
+UIKIT_EXTERN DDQButtonBeginSourceKey const DDQButtonBeginAttributeTitle;
 UIKIT_EXTERN DDQButtonBeginSourceKey const DDQButtonBeginBackgroundColor;
 
 NS_ASSUME_NONNULL_END
