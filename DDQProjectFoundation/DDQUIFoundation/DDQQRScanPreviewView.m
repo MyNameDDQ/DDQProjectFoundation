@@ -114,7 +114,7 @@
     
     _preview_scanRect = preview_scanRect;
     self.preview_scanImageView.frame = preview_scanRect;
-    [self layoutIfNeeded];
+    [self setNeedsLayout];
 }
 
 - (void)setPreview_dimColor:(UIColor *)preview_dimColor {

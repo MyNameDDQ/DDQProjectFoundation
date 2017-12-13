@@ -10,6 +10,7 @@
 #import "DDQAlertController.h"
 #import "DDQAlertItem.h"
 #import <AVFoundation/AVFoundation.h>
+#import "UIView+DDQSimplyGetViewProperty.h"
 
 @interface DDQQRScanController ()<AVCaptureMetadataOutputObjectsDelegate> {
     
@@ -17,7 +18,7 @@
 }
 
 @property (nonatomic, strong) AVCaptureSession *scan_captureSession;
-@property (nonatomic, strong) DDQQRScanPreviewView *scan_previewView;
+@property (nonatomic, strong, readwrite) DDQQRScanPreviewView *scan_previewView;
 @property (nonatomic, strong) dispatch_block_t scan_block;
 
 @end
@@ -43,16 +44,31 @@
     }
 }
 
-- (void)viewWillAppear:(BOOL)animated {
+- (void)viewWillLayoutSubviews {
     
-    [super viewWillAppear:YES];
-    [self scan_startScan];
+    [super viewWillLayoutSubviews];
+    
+    self.scan_previewView.frame = self.view.bounds;
+    
+    if (!self.scan_defaultRect) return;
+    
+    CGFloat previewWH = 192.0 * [UIView view_getCurrentDeviceRateWithVersion:DDQFoundationRateDevice_iPhone6].widthRate;
+    CGFloat previewX = (self.view.width * 0.5) - previewWH * 0.5;
+    CGFloat previewY = (self.view.height * 0.5) - previewWH * 0.5;
+    self.scan_previewView.preview_scanRect = CGRectMake(previewX, previewY, previewWH, previewWH);
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     
     [super viewDidAppear:YES];
     if (self.scan_block) dispatch_block_perform(DISPATCH_BLOCK_BARRIER, self.scan_block);
+    [self scan_startScan];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    
+    [super viewWillDisappear:YES];
+    [self scan_stopScan];
 }
 
 - (void)dealloc {
@@ -87,10 +103,18 @@
     self = [super init];
     if (!self) return nil;
     
-    self.scan_previewView = previewView;
+    if (!previewView) {
+
+        self.scan_previewView = [DDQQRScanPreviewView previewViewWithFrame:CGRectZero];
+        self.scan_previewView.preview_dimColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+        self.scan_previewView.preview_sacnImage = DDQ_DEFAULT_SOURCE_IMAGE(@"scan_box@2x", @"png");
+        self.scan_previewView.preview_lineImage = DDQ_DEFAULT_SOURCE_IMAGE(@"scan_line@2x", @"png");
+        self.scan_previewView.preview_animationDuration = 3.2;
+        [self.view addSubview:self.scan_previewView];
+    }
+    self.scan_defaultRect = YES;
     self.scan_showAuthorityAlert = YES;
     self.scan_alertController = [DDQAlertController alertControllerWithTitle:@"提示" message:@"" alertStyle:DDQAlertControllerStyleAlert];
-    [self.view addSubview:previewView];
     return self;
 }
 

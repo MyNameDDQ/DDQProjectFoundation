@@ -25,6 +25,7 @@
 #import "DDQAlertItem.h"
 #import "DDQTabBar.h"
 #import "DDQBarItem.h"
+#import "DDQSearchBar.h"
 #import "DDQQRScanPreviewView.h"
 #import "DDQWebPagePlaceholderView.h"
 

@@ -50,7 +50,11 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Cell的信息,PS:Identifier为键名，class为键值。在处理多种Cell时用这个属性
  */
-@property (nonatomic, copy) NSDictionary<NSString *, Class> *layout_cellDataSource;
+@property (nonatomic, copy) NSDictionary<NSString *, Class> *layout_cellDataSource NS_DEPRECATED_IOS(2_0, 2_2, "Not recommanded use the property");
+/**
+ Cell的重用数据源。PS:新的数据源以class的string形式为键名，重用字符串为键值。
+ */
+@property (nonatomic, copy) NSDictionary<NSString *, NSString *> *layout_reuseDataSource NS_AVAILABLE(2_0, 2_0);
 
 /**
  是否从xib中读取, default NO
@@ -71,6 +75,16 @@ NS_ASSUME_NONNULL_BEGIN
  Cell的Footer高度, UITableViewStylePlain default 0,UITableViewStyleGroup default 0.0000001
  */
 @property (nonatomic, assign) CGFloat layout_footerHeight;
+
+/**
+ HeaderView
+ */
+@property (nonatomic, strong) __kindof UIView *layout_headerView;
+
+/**
+ FooterView
+ */
+@property (nonatomic, strong) __kindof UIView *layout_footerView;
 
 @end
 

@@ -1,6 +1,7 @@
+
 Pod::Spec.new do |s|
   s.name         = 'DDQProjectFoundation'
-  s.version      = '1.2.3'
+  s.version      = '1.2.4'
   s.ios.deployment_target = '8.0'
   s.summary      = 'Easy Inherit'
   s.homepage     = 'https://github.com/MyNameDDQ/DDQProjectFoundation.git'
@@ -8,7 +9,8 @@ Pod::Spec.new do |s|
   s.author       = { 'DDQ' => '869795924@qq.com' }
   s.source       = { :git => 'https://github.com/MyNameDDQ/DDQProjectFoundation.git', :tag => s.version }
   s.source_files = 'DDQProjectFoundation/*.{h,m}'
-  s.public_header_files = 'DDQProjectFoundation/*.h'
+  #s.public_header_files = 'DDQProjectFoundation/DDQFoundationHeader.h'
+  s.resource = 'DDQProjectFoundation/DDQFoundationSource.bundle'
 
   s.requires_arc = true
   s.dependency 'AFNetworking'
@@ -20,10 +22,18 @@ Pod::Spec.new do |s|
   s.dependency 'MBProgressHUD'
   s.dependency 'WebViewJavascriptBridge', '~> 4.1.5'
 
+  s.subspec 'DDQFoundationDefine' do |define|
+
+    define.source_files = 'DDQProjectFoundation/DDQFoundationDefine/*.h'
+    define.public_header_files = 'DDQProjectFoundation/DDQFoundationDefine/*.h'
+
+  end
+
   s.subspec 'DDQUIFoundation' do |ui|
 
     ui.source_files = 'DDQProjectFoundation/DDQUIFoundation/*.{h,m}'
     ui.public_header_files = 'DDQProjectFoundation/DDQUIFoundation/*.h'
+    ui.dependency 'DDQProjectFoundation/DDQFoundationDefine'
 
   end
 
@@ -36,10 +46,11 @@ Pod::Spec.new do |s|
 
   s.subspec 'DDQControllerFoundation' do |controller|
 
-    controller.source_files = 'DDQProjectFoundation/DDQControllerFoundation/*.{h,m,json}'
+    controller.source_files = 'DDQProjectFoundation/DDQControllerFoundation/*.{h,m}'
     controller.public_header_files = 'DDQProjectFoundation/DDQControllerFoundation/*.h'
     controller.dependency 'DDQProjectFoundation/DDQUIFoundation'
     controller.dependency 'DDQProjectFoundation/DDQCategoryFoundation'
+    #controller.dependency 'DDQProjectFoundation/DDQFoundationDefine'
 
   end
 

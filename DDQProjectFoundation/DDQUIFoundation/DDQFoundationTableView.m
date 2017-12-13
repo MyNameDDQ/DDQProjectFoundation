@@ -41,16 +41,25 @@
  */
 - (void)tableView_initialize {
     
-    NSDictionary *dataDic = self.tableView_layout.layout_cellDataSource;
-    
-    if (dataDic) {
+    if (self.tableView_layout.layout_reuseDataSource) {
         
+        NSDictionary *dataDic = self.tableView_layout.layout_reuseDataSource;
+        for (NSString *classKey in dataDic.allKeys) {
+            
+            NSString *identifier = dataDic[classKey];
+            !(self.tableView_layout.layout_loadFromNib) ? [self registerClass:NSClassFromString(classKey) forCellReuseIdentifier:identifier] : [self registerNib:[UINib nibWithNibName:classKey bundle:nil] forCellReuseIdentifier:identifier];
+        }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored"-Wdeprecated-declarations"
+    } else if (self.tableView_layout.layout_cellDataSource) {
+        
+        NSDictionary *dataDic = self.tableView_layout.layout_cellDataSource;
         for (NSString *identifier in dataDic.allKeys) {
             
             self.tableView_layout.layout_loadFromNib?[self registerNib:[UINib nibWithNibName:NSStringFromClass(dataDic[identifier]) bundle:nil] forCellReuseIdentifier:identifier]:[self registerClass:dataDic[identifier] forCellReuseIdentifier:identifier];
         }
     } else {
-        
+#pragma clang diagnostic pop
         self.tableView_layout.layout_loadFromNib?[self registerNib:[UINib nibWithNibName:NSStringFromClass(self.tableView_layout.layout_cellClass) bundle:nil] forCellReuseIdentifier:self.tableView_layout.layout_cellIdentifier]:[self registerClass:self.tableView_layout.layout_cellClass forCellReuseIdentifier:self.tableView_layout.layout_cellIdentifier];
     }
     

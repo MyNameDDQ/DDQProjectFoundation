@@ -47,20 +47,20 @@ typedef NS_ENUM(NSUInteger, DDQFoundationAuthorityType) {
 
 typedef NS_ENUM(NSUInteger, DDQFoundationAuthorityErrorCode) {
     
-    DDQFoundationErrorNoCamera,
-    DDQFoundationErrorCameraNotUse,
-    DDQFoundationErrorNoMicrophone,
-    DDQFoundationErrorMicrophoneNotUse,
-    DDQFoundationErrorPhotoLibaryNotUse,
-    DDQFoundationErrorHealthKitNotUse,
+    DDQFoundationErrorNoCamera,         //没有摄像头
+    DDQFoundationErrorCameraNotUse,     //摄像头不可用
+    DDQFoundationErrorNoMicrophone,     //没有麦克风
+    DDQFoundationErrorMicrophoneNotUse, //麦克风不可用
+    DDQFoundationErrorPhotoLibaryNotUse,//相册不可用
+    DDQFoundationErrorHealthKitNotUse,  //“健康”不可访问
 };
 
 typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
     
-    DDQFoundationRequestFailure = 107038,
-    DDQFoundationRequestNotConnection,
-    DDQFoundationRequestTimeOut,
-    DDQFoundationRequestCancel,
+    DDQFoundationRequestFailure = 107038,       //请求错误
+    DDQFoundationRequestNotConnection,          //没有网络连接
+    DDQFoundationRequestTimeOut,                //请求超时
+    DDQFoundationRequestCancel,                 //请求取消
 };
 
 @class MJRefreshHeader;
@@ -121,7 +121,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @param handle 下拉的回调
  @return 如果需要，自己设置这个Header
  */
-+ (__kindof MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void(^)())handle;
++ (__kindof MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void(^)(void))handle;
 
 /**
  设置Footer
@@ -131,7 +131,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @param handle 上拉的回调
  @return 如果需要，自己设置这个Footer
  */
-+ (__kindof MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void(^)())handle;
++ (__kindof MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void(^)(void))handle;
 @end
 
 @interface UIScrollView (DDQFoundationRefreshHandle)
@@ -152,6 +152,8 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
 
 @end
 
+typedef void(^_Nullable DDQRequestSuccess)(_Nullable id result);
+typedef void(^_Nullable DDQRequestFailure)(NSDictionary<DDQFoundationRequestFailureKey, NSString *> *errDic);
 @interface DDQFoundationController (DDQFoundationNetRequest)
 
 /**
@@ -181,7 +183,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @param success 请求成功
  @param failure 请求失败
  */
-- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Success:(void(^)(id _Nullable result))success Failure:(void(^)(NSDictionary<DDQFoundationRequestFailureKey, NSString *> *errDic))failure;
+- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Success:(DDQRequestSuccess)success Failure:(DDQRequestFailure)failure;
 
 /**
  基础请求:POST
@@ -191,7 +193,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @param success 请求成功
  @param failure 请求失败
  */
-- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Success:(void (^)(id _Nullable result))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> *errDic))failure;
+- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Success:(DDQRequestSuccess)success Failure:(DDQRequestSuccess)failure;
 
 /**
  基础请求:上传图片
@@ -203,7 +205,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @param progress 上传进度
  @param failure 上传失败
  */
-- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Images:(NSDictionary<NSString *, UIImage *> *)images Success:(void (^)(id _Nullable result))success Progress:(void (^)(NSProgress *progress))progress Failure:(void(^)(NSDictionary<DDQFoundationRequestFailureKey, NSString *> *errDic))failure;
+- (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Images:(NSDictionary<NSString *, UIImage *> *)images Success:(DDQRequestSuccess)success Progress:(void (^)(NSProgress *progress))progress Failure:(DDQRequestFailure)failure;
 
 /**
  基础请求:base64上传图片
@@ -214,21 +216,110 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @param progress 上传进度
  @param failure 上传失败
  */
-- (void)foundation_UploadBase64StringWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Success:(void(^)(id _Nullable result))success Progress:(void(^)(double progress))progress Failure:(void(^)(NSDictionary<DDQFoundationRequestFailureKey, NSString *> *errDic))failure;
+- (void)foundation_UploadBase64StringWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *, NSString *> *)param Success:(DDQRequestSuccess)success Progress:(void(^)(double progress))progress Failure:(DDQRequestFailure)failure;
 @end
 
+typedef BOOL(^_Nullable DDQFoundationRequestHandle)(_Nullable id response, int code);
+typedef void(^_Nullable DDQFoundationRequestAlertHandle)(int code);
+typedef MBProgressHUD *_Nullable(^_Nullable DDQFoundationRequestHUDHandle)(void);
+
+@interface DDQFoundationController (DDQFoundationRequestHandle)
+
+/**
+ 处理POST请求及HUD的显示
+ 
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param handle 请求的结果
+ */
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle;
+
+/**
+ 处理POST请求及HUD的显示
+ 
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param handle 请求的结果
+ @param alert 当HUD隐藏后的回调
+ */
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert;
+
+/**
+ 处理POST请求及HUD的显示
+ 
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param hud 显示的HUD。为空且show为YES时会创建一个默认的hud。hud的设置见<DDQFoundationHUDHandler>代理
+ @param handle 请求的结果
+ @param alert 当HUD隐藏后的回调
+ */
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WaitHud:(DDQFoundationRequestHUDHandle)hud ShowHud:(BOOL)show WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert;
+
+/**
+ 处理GET请求及HUD的显示
+ 
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param handle 请求的结果
+ */
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle;
+
+/**
+ 处理GET请求及HUD的显示
+ 
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param handle 请求的结果
+ @param alert 当HUD隐藏后的回调
+ */
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert;
+
+/**
+ 处理GET请求及HUD的显示
+ 
+ @param url 请求的接口地址
+ @param param 请求的参数
+ @param hud 显示的HUD。为空且show为YES时会创建一个默认的hud。hud的设置见<DDQFoundationHUDHandler>代理
+ @param handle 请求的结果
+ @param alert 当HUD隐藏后的回调
+ */
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WaitHud:(DDQFoundationRequestHUDHandle)hud ShowHud:(BOOL)show WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert;
+
+@end
 
 @protocol DDQFoundationHUDHandler <NSObject>
+
 @optional
 
 /**
  指定HUD的父视图
  */
-- (UIView *)foundation_HUDSuperView;
+- (UIView *)foundation_HUDSuperView;//default self.view
+
+/**
+ 提示HUD隐藏的时间
+ */
+- (float)foundation_alertHUDHiddenAfterDelay;//default 1.2
+
+/**
+ 等待HUD隐藏的时间
+ */
+- (float)foundation_waitHUDHiddenAfterDelay;//default 0.2
+
+/**
+ HUD显示的文字
+ */
+- (NSString *)foundation_showHUDText;//default 请稍候...
+
+/**
+ HUD显示的类型
+ */
+- (MBProgressHUDMode)foundation_showHUDMode;//default MBProgressHUDModeIndeterminate
 
 @end
 
 @interface DDQFoundationController (DDQFoundationUserInterface)<DDQFoundationHUDHandler>
+
 /**
  控制器默认的hud
  */
@@ -251,50 +342,6 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @return hud的实例
  */
 - (MBProgressHUD *)alertHUDWithMode:(MBProgressHUDMode)mode Text:(nullable NSString *)text Delegate:(nullable id<MBProgressHUDDelegate>)delegate;
-
-@end
-
-typedef BOOL(^_Nullable DDQFoundationRequestHandle)(_Nullable id response, int code);
-typedef void(^_Nullable DDQFoundationRequestAlertHandle)(int code);
-
-@interface DDQFoundationController (DDQFoundationRequestHandle)
-/**
- 处理POST请求及HUD的显示
-
- @param url 请求的接口地址
- @param param 请求的参数
- @param handle 请求的结果
- @param alert 当HUD隐藏后的回调
- */
-- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert;
-
-/**
- 处理POST请求及HUD的显示
-
- @param url 请求的接口地址
- @param param 请求的参数
- @param handle 请求的结果
- */
-- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle;
-
-/**
- 处理GET请求及HUD的显示
-
- @param url 请求的接口地址
- @param param 请求的参数
- @param handle 请求的结果
- @param alert 当HUD隐藏后的回调
- */
-- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert;
-
-/**
- 处理GET请求及HUD的显示
- 
- @param url 请求的接口地址
- @param param 请求的参数
- @param handle 请求的结果
- */
-- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle;
 
 @end
 

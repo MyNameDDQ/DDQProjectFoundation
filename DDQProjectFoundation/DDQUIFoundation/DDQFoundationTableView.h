@@ -9,7 +9,7 @@
 @class DDQFoundationTableViewLayout;
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NSInteger(^DDQTableViewSectionConfig)();
+typedef NSInteger(^DDQTableViewSectionConfig)(void);
 typedef NSInteger(^DDQTableViewRowConfig)(NSInteger section);
 typedef void(^DDQTableViewDidSelectConfig)(NSIndexPath *indexPath);
 typedef CGFloat(^DDQTableViewHeaderHeightConfig)(NSInteger section);

@@ -35,4 +35,18 @@
 
 #define DDQ_REQUIRES_SUPER __attribute__((objc_requires_super))
 
+#define DDQ_SOURCE_PATH(bundleName, extension) [NSBundle bundleWithPath: \
+[[NSBundle mainBundle] pathForResource:bundleName ofType:extension]]
+
+#define DDQ_SOURCE_FILE(bundleName, bExtension, fileName, fExtension) [UIImage imageWithContentsOfFile: \
+[DDQ_SOURCE_PATH(bundleName, bExtension) pathForResource:fileName ofType:fExtension]]
+
+#define DDQ_DEFAULT_SOURCE_PATH DDQ_SOURCE_PATH(@"DDQFoundationSource", @"bundle")
+
+#define DDQ_DEFAULT_SOURCE_IMAGE(imageName, extension) [UIImage imageWithContentsOfFile: \
+[DDQ_DEFAULT_SOURCE_PATH pathForResource:imageName ofType:extension]]
+
+#define DDQ_DEFAULT_SOURCE_FILEPATH(fileName, extension) [DDQ_DEFAULT_SOURCE_PATH \
+pathForResource:fileName ofType:extension]
+
 #endif /* DDQFoundationDefine_h */

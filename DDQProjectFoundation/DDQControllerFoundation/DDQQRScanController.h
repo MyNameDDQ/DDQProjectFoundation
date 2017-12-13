@@ -17,14 +17,20 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  初始化方法
  
- @param previewView 二维码扫描的预览视图
+ @param previewView 二维码扫描的预览视图。为空则显示默认布局。
  */
-- (instancetype)initWithPreviewView:(DDQQRScanPreviewView *)previewView;
+- (instancetype)initWithPreviewView:(nullable DDQQRScanPreviewView *)previewView;
+@property (nonatomic, strong, readonly) DDQQRScanPreviewView *scan_previewView;
 
 /**
  提不提示权限不足
  */
 @property (nonatomic, assign) BOOL scan_showAuthorityAlert;//Default YES
+
+/**
+ 是否使用默认的扫描区域
+ */
+@property (nonatomic, assign) BOOL scan_defaultRect;//Default YES
 
 /**
  提示时的控制器

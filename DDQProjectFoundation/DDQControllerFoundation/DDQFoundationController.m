@@ -24,14 +24,6 @@
 
 DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq.foundation.errorDesc";
 
-- (void)viewDidLoad {
-    
-    [super viewDidLoad];
-    
-    //view的一些设置
-    [self setAutomaticallyAdjustsScrollViewInsets:NO];
-}
-
 #pragma mark - Base Method
 - (UIButton *)setLeftBarButtonItemStyle:(DDQFoundationBarButtonStyle)style Content:(id)content {
     
@@ -119,11 +111,15 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     button.frame = frame;
     [button addTarget:self action:sel forControlEvents:UIControlEventTouchUpInside];
 }
+
+- (UIModalPresentationStyle)modalPresentationStyle {
+    return UIModalPresentationOverFullScreen;
+}
 @end
 
 @implementation DDQFoundationController (DDQFoundationRefreshConfig)
 
-+ (MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void (^)())handle {
++ (MJRefreshHeader *)foundation_setHeaderWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationHeaderStyle)style Handle:(void (^)(void))handle {
     
     Class headerClass;
     switch (style) {
@@ -152,7 +148,7 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     return scrollView.mj_header;
 }
 
-+ (MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void (^)())handle {
++ (MJRefreshFooter *)foundation_setFooterWithView:(__kindof UIScrollView *)scrollView Stlye:(DDQFoundationFooterStyle)style Handle:(void (^)(void))handle {
     
     Class footerClass;
     switch (style) {
@@ -251,26 +247,35 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     }];
 }
 
-- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
+- (void)foundation_GETRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(DDQRequestSuccess)success Failure:(DDQRequestFailure)failure {
     
-    AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
-    
-    [sessionManager GET:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        success([self foundation_handleResponseObject:responseObject]);
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        failure([self foundation_handleRequestError:error]);
-    }];
+    [self foundation_requestWithMethod:@"GET" url:url param:param success:success failure:failure];
 }
 
-- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *,NSString *> *)param Success:(void (^)(id _Nullable))success Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
+- (void)foundation_POSTRequestWithUrl:(NSString *)url Param:(NSDictionary<NSString *,NSString *> *)param Success:(DDQRequestSuccess)success Failure:(DDQRequestSuccess)failure {
+    
+    [self foundation_requestWithMethod:@"POST" url:url param:param success:success failure:failure];
+}
+
+- (void)foundation_requestWithMethod:(NSString *)method url:(NSString *)url param:(nullable NSDictionary<NSString *,NSString *> *)param success:(DDQRequestSuccess)success failure:(DDQRequestFailure)failure {
     
     AFHTTPSessionManager *sessionManager = [self foundation_sessionManagerConfig];
-    
-    [sessionManager POST:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        success([self foundation_handleResponseObject:responseObject]);
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        failure([self foundation_handleRequestError:error]);
-    }];
+
+    if ([method isEqualToString:@"POST"]) {
+        
+        [sessionManager POST:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            success([self foundation_handleResponseObject:responseObject]);
+        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+            failure([self foundation_handleRequestError:error]);
+        }];
+    } else {
+        
+        [sessionManager GET:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            success([self foundation_handleResponseObject:responseObject]);
+        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+            failure([self foundation_handleRequestError:error]);
+        }];
+    }
 }
 
 - (void)foundation_UploadRequestWithUrl:(NSString *)url Param:(nullable NSDictionary<NSString *,NSString *> *)param Images:(NSDictionary<NSString *,UIImage *> *)images Success:(void (^)(id _Nullable))success Progress:(void (^)(NSProgress * _Nonnull))progress Failure:(void (^)(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull))failure {
@@ -399,6 +404,189 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
     }
     return object;
 }
+
+@end
+
+@implementation DDQFoundationController (DDQFoundationRequestHandle)
+
+#pragma mark - GET Request
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle {
+    
+    [self foundation_processNetGETRequestWithUrl:url Param:param WhenHUDHidden:handle AfterAlert:nil];
+}
+
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert {
+
+    [self foundation_processNetGETRequestWithUrl:url Param:param WaitHud:nil ShowHud:YES WhenHUDHidden:handle AfterAlert:alert];
+}
+
+- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WaitHud:(DDQFoundationRequestHUDHandle)hud ShowHud:(BOOL)show WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert {
+    
+    [self foundation_processRequestWithMethod:@"GET" url:url param:param waitHud:hud showHud:show whenHUDHidden:handle afterAlert:alert];
+}
+
+#pragma mark - POST Request
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle {
+    
+    [self foundation_processNetPOSTRequestWithUrl:url Param:param WhenHUDHidden:handle AfterAlert:nil];
+}
+
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert {
+
+    [self foundation_processNetPOSTRequestWithUrl:url Param:param WaitHud:nil ShowHud:YES WhenHUDHidden:handle AfterAlert:alert];
+}
+
+- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WaitHud:(DDQFoundationRequestHUDHandle)hud ShowHud:(BOOL)show WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert {
+    
+    [self foundation_processRequestWithMethod:@"POST" url:url param:param waitHud:hud showHud:show whenHUDHidden:handle afterAlert:alert];
+}
+
+#pragma mark - Public Method
+/**
+ 集中处理不同请求方式的结果
+ */
+- (void)foundation_processRequestWithMethod:(NSString *)method url:(NSString *)url param:(NSDictionary *)param waitHud:(DDQFoundationRequestHUDHandle)hud showHud:(BOOL)show whenHUDHidden:(DDQFoundationRequestHandle)handle afterAlert:(DDQFoundationRequestAlertHandle)alert  {
+    
+    MBProgressHUD *waitHud;
+    //是否允许显示等待的HUD
+    if (show) {
+        
+        //是否设置了自定义的HUD
+        if (hud) {
+            waitHud = hud();
+        }
+        //自定义的HUD是否为空
+        if (!waitHud) {
+            waitHud = [MBProgressHUD showHUDAddedTo:[self foundation_getHUDSuperView] animated:YES];
+            waitHud.label.text = [self foundation_getHUDText];
+            waitHud.mode = [self foundation_getHUDMode];
+        }
+    }
+    
+    DDQWeakObject(self);
+    [self foundation_requestWithMethod:method url:url param:param success:^(id  _Nullable result) {
+        
+        int netCode = [result[@"result"] intValue];
+        NSString *netMessage = result[@"message"];
+        if (handle) {
+            
+            BOOL isShow = handle(result, netCode);//数据处理完成
+            if (isShow) {
+                
+                [weakObjc foundation_handleRequestedWithHud:waitHud message:netMessage code:DDQFoundationRequestFailure hidden:YES alertHandler:alert];
+            }
+        }
+        
+    } failure:^(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull errDic) {
+        
+        if (handle) {
+            
+            BOOL isShow = handle(nil, DDQFoundationRequestFailure);//数据处理完成
+            if (isShow) {
+                
+                [weakObjc foundation_handleRequestedWithHud:waitHud message:errDic[DDQFoundationRequestFailureDesc] code:DDQFoundationRequestFailure hidden:YES alertHandler:alert];
+            }
+        }
+    }];
+}
+
+/**
+ 集中处理hud的显示和显示后的操作
+ */
+- (void)foundation_handleRequestedWithHud:(MBProgressHUD *)hud message:(NSString *)message code:(int)code hidden:(BOOL)hidden alertHandler:(DDQFoundationRequestAlertHandle)alert {
+    
+    DDQWeakObject(self);
+    if (hud) {
+        
+        hud.completionBlock = ^{
+            
+            MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
+            alertHUD.label.text = message;
+            alertHUD.mode = MBProgressHUDModeText;
+            alertHUD.removeFromSuperViewOnHide = YES;
+            
+            [alertHUD hideAnimated:YES afterDelay:[weakObjc foundation_getAlertHUDHiddenTime]];
+            alertHUD.completionBlock = ^{
+                
+                if (alert) {
+                    weakObjc.foundation_hud.completionBlock = nil;
+                    alert(code);
+                }
+            };
+        };
+        if (hidden) {
+            [hud hideAnimated:YES afterDelay:[self foundation_getWaitHUDHiddenTime]];
+        }
+    } else {
+        
+        MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
+        alertHUD.label.text = message;
+        alertHUD.mode = MBProgressHUDModeText;
+        alertHUD.removeFromSuperViewOnHide = YES;
+        
+        [alertHUD hideAnimated:YES afterDelay:[weakObjc foundation_getAlertHUDHiddenTime]];
+        alertHUD.completionBlock = ^{
+            
+            if (alert) {
+                weakObjc.foundation_hud.completionBlock = nil;
+                alert(DDQFoundationRequestFailure);
+            }
+        };
+    }
+}
+
+/** 获取HUD的父视图 */
+- (UIView *)foundation_getHUDSuperView {
+    
+    UIView *superView = nil;
+    if ([self respondsToSelector:@selector(foundation_HUDSuperView)]) {
+        superView = [self performSelector:@selector(foundation_HUDSuperView)];
+    } else {
+        superView = self.view;
+    }
+    return superView;
+}
+
+/** 获取AlertHUD隐藏时间 */
+- (float)foundation_getAlertHUDHiddenTime {
+    
+    float time = 1.2;
+    if ([self respondsToSelector:@selector(foundation_alertHUDHiddenAfterDelay)]) {
+        time = [[self performSelector:@selector(foundation_alertHUDHiddenAfterDelay)] floatValue];
+    }
+    return time;
+}
+
+/** 获取WaitHUD隐藏时间 */
+- (float)foundation_getWaitHUDHiddenTime {
+ 
+    float time = 0.2;
+    if ([self respondsToSelector:@selector(foundation_waitHUDHiddenAfterDelay)]) {
+        time = [[self performSelector:@selector(foundation_waitHUDHiddenAfterDelay)] floatValue];
+    }
+    return time;
+}
+
+/** 获取HUD显示的文字 */
+- (NSString *)foundation_getHUDText {
+    
+    NSString *text = @"请稍候...";
+    if ([self respondsToSelector:@selector(foundation_showHUDText)]) {
+        text = [self performSelector:@selector(foundation_showHUDText)];
+    }
+    return text;
+}
+
+/** 获取HUD显示的类型 */
+- (MBProgressHUDMode)foundation_getHUDMode {
+    
+    MBProgressHUDMode mode = MBProgressHUDModeIndeterminate;
+    if ([self respondsToSelector:@selector(foundation_showHUDMode)]) {
+        mode = [[self performSelector:@selector(foundation_showHUDMode)] integerValue];
+    }
+    return mode;
+}
+
 @end
 
 @implementation DDQFoundationController (DDQFoundationUserInterface)
@@ -461,167 +649,6 @@ static const char *HUDKey = "com.ddq.foundation.defaultHUD";
     hud.removeFromSuperViewOnHide = YES;
     return hud;
 }
-@end
-
-@implementation DDQFoundationController (DDQFoundationRequestHandle)
-
-- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle {
-
-    [self foundation_processNetPOSTRequestWithUrl:url Param:param WhenHUDHidden:handle AfterAlert:nil];
-}
-
-- (void)foundation_processNetPOSTRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert {
-
-    [self.foundation_hud showAnimated:YES];
-    
-    DDQWeakObject(self);
-    [self foundation_POSTRequestWithUrl:url Param:param Success:^(id  _Nullable result) {
-        
-        int netCode = [result[@"result"] intValue];
-        NSString *netMessage = result[@"message"];
-        
-        if (handle) {
-            
-            BOOL isShow = handle(result, netCode);//数据处理完成
-            
-            [weakObjc.foundation_hud hideAnimated:YES afterDelay:0.2];
-            
-            //检查错误是否提示错误信息
-            if (isShow) {//提示消息
-                weakObjc.foundation_hud.completionBlock = ^{
-                    
-                    MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
-                    alertHUD.label.text = netMessage;
-                    alertHUD.mode = MBProgressHUDModeText;
-                    alertHUD.removeFromSuperViewOnHide = YES;
-                    
-                    [alertHUD hideAnimated:YES afterDelay:1.2];
-                    alertHUD.completionBlock = ^{
-                        
-                        if (alert) {
-                            weakObjc.foundation_hud.completionBlock = nil;
-                            alert(netCode);
-                        }
-                    };
-                };
-            }
-        }
-    } Failure:^(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull errDic) {
-        
-        if (handle) {
-            
-            BOOL isShow = handle(nil, DDQFoundationRequestFailure);//数据处理完成
-            
-            [weakObjc.foundation_hud hideAnimated:YES afterDelay:0.2];
-            //检查错误是否提示错误信息
-            if (isShow) {//提示消息
-                weakObjc.foundation_hud.completionBlock = ^{
-                    
-                    MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
-                    alertHUD.label.text = errDic[DDQFoundationRequestFailureDesc];
-                    alertHUD.mode = MBProgressHUDModeText;
-                    alertHUD.removeFromSuperViewOnHide = YES;
-                    
-                    [alertHUD hideAnimated:YES afterDelay:1.2];
-                    alertHUD.completionBlock = ^{
-                        
-                        if (alert) {
-                            weakObjc.foundation_hud.completionBlock = nil;
-                            alert(DDQFoundationRequestFailure);
-                        }
-                    };
-                };
-            }
-        }
-    }];
-}
-
-- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle {
-
-    [self foundation_processNetGETRequestWithUrl:url Param:param WhenHUDHidden:handle AfterAlert:nil];
-}
-
-- (void)foundation_processNetGETRequestWithUrl:(NSString *)url Param:(NSDictionary *)param WhenHUDHidden:(DDQFoundationRequestHandle)handle AfterAlert:(DDQFoundationRequestAlertHandle)alert {
-
-    [self.foundation_hud showAnimated:YES];
-    
-    DDQWeakObject(self);
-    [self foundation_GETRequestWithUrl:url Param:param Success:^(id  _Nullable result) {
-        
-        int netCode = [result[@"result"] intValue];
-        NSString *netMessage = result[@"message"];
-        
-        if (handle) {
-            
-            BOOL isShow = handle(result, netCode);//数据处理完成
-            
-            [weakObjc.foundation_hud hideAnimated:YES afterDelay:0.2];
-            
-            //检查错误是否提示错误信息
-            if (isShow) {//提示消息
-                weakObjc.foundation_hud.completionBlock = ^{
-                    
-                    MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
-                    alertHUD.label.text = netMessage;
-                    alertHUD.mode = MBProgressHUDModeText;
-                    alertHUD.removeFromSuperViewOnHide = YES;
-                    
-                    [alertHUD hideAnimated:YES afterDelay:1.2];
-                    alertHUD.completionBlock = ^{
-                        
-                        if (alert) {
-                            alert(netCode);
-                        }
-                        if (weakObjc.foundation_hud.completionBlock) {
-                            weakObjc.foundation_hud.completionBlock = nil;
-                        }
-                    };
-                };
-            }
-        }
-    } Failure:^(NSDictionary<DDQFoundationRequestFailureKey,NSString *> * _Nonnull errDic) {
-        
-        if (handle) {
-            
-            BOOL isShow = handle(nil, DDQFoundationRequestFailure);//数据处理完成
-            
-            [weakObjc.foundation_hud hideAnimated:YES afterDelay:0.2];
-            //检查错误是否提示错误信息
-            if (isShow) {//提示消息
-                weakObjc.foundation_hud.completionBlock = ^{
-                    
-                    MBProgressHUD *alertHUD = [MBProgressHUD showHUDAddedTo:[weakObjc foundation_getHUDSuperView] animated:YES];
-                    alertHUD.label.text = errDic[DDQFoundationRequestFailureDesc];
-                    alertHUD.mode = MBProgressHUDModeText;
-                    alertHUD.removeFromSuperViewOnHide = YES;
-                    
-                    [alertHUD hideAnimated:YES afterDelay:1.2];
-                    alertHUD.completionBlock = ^{
-                        
-                        if (alert) {
-                            alert(DDQFoundationRequestFailure);
-                        }
-                        if (weakObjc.foundation_hud.completionBlock) {
-                            weakObjc.foundation_hud.completionBlock = nil;
-                        }
-                    };
-                };
-            }
-        }
-    }];
-}
-
-- (UIView *)foundation_getHUDSuperView {
-    
-    UIView *superView = nil;
-    if ([self respondsToSelector:@selector(foundation_HUDSuperView)]) {
-        superView = [self performSelector:@selector(foundation_HUDSuperView)];
-    } else {
-        superView = self.view;
-    }
-    return superView;
-}
-
 @end
 
 @implementation DDQFoundationController (DDQFoundationUserAuthority)

@@ -27,6 +27,7 @@
     
     [super viewDidLoad];
     
+    self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
     self.picker_separatorColor = kSetColor(235.0, 235.0, 235.0, 1.0);
     _rateSet = [UIView view_getCurrentDeviceRateWithVersion:DDQFoundationRateDevice_iPhone6];
 
@@ -131,8 +132,10 @@
     //如果设置过数据源则不读取数据
     if (self.picker_dataSource.count > 0) return;
     
-    NSBundle *mainBundle = [NSBundle mainBundle];
-    NSData *provinceData = [NSData dataWithContentsOfFile:[mainBundle pathForResource:@"jd-area" ofType:@"json"]];
+    NSString *filePath = DDQ_DEFAULT_SOURCE_FILEPATH(@"jd-area", @"json");
+    if (!filePath) return;
+    
+    NSData *provinceData = [NSData dataWithContentsOfFile:filePath];
     NSDictionary *provinceDic = [NSJSONSerialization JSONObjectWithData:provinceData options:NSJSONReadingMutableContainers error:nil];
     self.picker_dataSource = provinceDic[@"info"];
 }
