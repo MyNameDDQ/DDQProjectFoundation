@@ -66,7 +66,7 @@
 - (void)viewWillLayoutSubviews {
     
     [super viewWillLayoutSubviews];
- 
+    
     if (self.alert_style == DDQAlertControllerStyleAlertExceptHeader || self.alert_style == DDQAlertControllerStyleAlert) {
         
         [self alert_layoutAlertStyleFrameWithRate:self.alert_rateSet];
@@ -98,7 +98,7 @@
     CGFloat contentX = 25.0;
     contentX = contentX * rateSet.widthRate;
     CGFloat contentW = self.view.width - contentX * 2.0;
-
+    
     CGFloat labelX = 16.0 * rateSet.widthRate;
     CGFloat boundW = contentW - labelX * 2.0;
     CGSize boundSize = CGSizeMake(boundW, 200.0);
@@ -126,7 +126,7 @@
         self.alert_verLineView.frame = CGRectMake(contentW * 0.5 - 0.5, itemY, 1.0, itemH);
         self.alert_verLineView.hidden = NO;
         for (NSInteger index = 0; index < self.alert_itemContainer.count; index++) {
-
+            
             DDQAlertItem *item = self.alert_itemContainer[index];
             item.frame = CGRectMake(itemX, itemY, contentW * 0.5, itemH);
             itemX = CGRectGetMaxX(item.frame);
@@ -134,7 +134,7 @@
     } else {
         
         for (NSInteger index = 0; index < self.alert_itemContainer.count; index++) {
-
+            
             DDQAlertItem *item = self.alert_itemContainer[index];
             item.frame = CGRectMake(0.0, itemY, contentW, itemH);
             itemY = CGRectGetMaxY(item.frame);
@@ -194,7 +194,7 @@
         itemTotalH = itemH;
     }
     CGFloat contentH = itemTotalH + self.alert_headerView.height;
-
+    
     CGRect footerFrame = CGRectZero;
     CGFloat bottomSpace = 12.0 * rateSet.heightRate;
     if (self.alert_itemContainer.count > 1) {
@@ -253,7 +253,7 @@
     [self.alert_contentView addSubview:self.alert_verLineView];
     self.alert_verLineView.hidden = YES;
     self.alert_verLineView.backgroundColor = kSetColor(235.0, 235.0, 235.0, 1.0);
-
+    
     self.alert_titleLabel = [[UILabel alloc] init];
     [self.alert_headerView addSubview:self.alert_titleLabel];
     self.alert_titleLabel.textColor = [UIColor blackColor];
@@ -296,7 +296,7 @@
         self.alert_messageFont = (self.alert_style == DDQAlertControllerStyleAlert) ? [UIFont systemFontOfSize:13.0] : [UIFont systemFontOfSize:12.0];
         self.alert_attrMessage = [[NSAttributedString alloc] initWithString:self.alert_message attributes:@{NSFontAttributeName:self.alert_messageFont}];
     }
-
+    
 }
 
 - (void)alert_addAlertItem:(DDQAlertItemSetup)setup handler:(DDQAlertItemHandler)handler {
@@ -330,6 +330,10 @@
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
     DDQAlertItemHandler handler = [self.alert_handlerContainer valueForKey:@(item.hash).stringValue];
     if (handler) handler(item);
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(alert_didSelectItem:)]) {
+        [self.delegate alert_didSelectItem:item];
+    }
 }
 
 #pragma mark - Label KVO
@@ -347,7 +351,7 @@
             //当前的样式判断
             //PS:当前为except的样式不会注册KVO
             if (self.alert_style == DDQAlertControllerStyleAlert) {
-
+                
                 [self alert_layoutAlertStyleFrameWithRate:self.alert_rateSet];
             } else {
                 
@@ -358,7 +362,7 @@
             self.alert_attrTitle = self.alert_titleLabel.attributedText;
             
             if (self.alert_style == DDQAlertControllerStyleAlert) {
-
+                
                 [self alert_layoutAlertStyleFrameWithRate:self.alert_rateSet];
             } else {
                 
@@ -372,7 +376,7 @@
             self.alert_attrMessage = [[NSAttributedString alloc] initWithString:self.alert_messageLabel.text attributes:@{NSFontAttributeName:self.alert_messageLabel.font}];
             
             if (self.alert_style == DDQAlertControllerStyleAlert) {
-
+                
                 [self alert_layoutAlertStyleFrameWithRate:self.alert_rateSet];
             } else {
                 
@@ -381,7 +385,7 @@
         } else {
             
             self.alert_attrTitle = [[NSAttributedString alloc] initWithString:self.alert_titleLabel.text attributes:@{NSFontAttributeName:self.alert_titleLabel.font}];
-
+            
             if (self.alert_style == DDQAlertControllerStyleAlert) {
                 
                 [self alert_layoutAlertStyleFrameWithRate:self.alert_rateSet];

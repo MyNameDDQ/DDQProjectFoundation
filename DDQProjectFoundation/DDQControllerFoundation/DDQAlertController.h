@@ -17,7 +17,7 @@ typedef NS_ENUM(NSUInteger, DDQAlertControllerStyle) {
 };
 typedef __kindof DDQAlertItem *_Nullable(^_Nullable DDQAlertItemSetup)(void);
 typedef void(^_Nullable DDQAlertItemHandler)(DDQAlertItem *item);
-
+@protocol DDQAlertControllerDelegate;
 /**
  提示控制器
  */
@@ -43,7 +43,16 @@ typedef void(^_Nullable DDQAlertItemHandler)(DDQAlertItem *item);
  */
 @property (nonatomic, strong, readonly) UIView *alert_footContentView;
 
+/**
+ Controller上Item的集合
+ */
 @property (nonatomic, copy, readonly) NSArray<DDQAlertItem *> *alert_items;
+
+/**
+ 代理方法
+ */
+@property (nonatomic, weak, nullable) id <DDQAlertControllerDelegate> delegate;
+
 /**
  添加一个Item
  
@@ -56,6 +65,16 @@ typedef void(^_Nullable DDQAlertItemHandler)(DDQAlertItem *item);
  更新当前的提示类型
  */
 - (void)alert_updateControllerStyle:(DDQAlertControllerStyle)style;
+
+@end
+
+@protocol DDQAlertControllerDelegate <NSObject>
+
+@optional
+/**
+ 点击的Item的索引
+ */
+- (void)alert_didSelectItem:(DDQAlertItem *)item;
 
 @end
 
