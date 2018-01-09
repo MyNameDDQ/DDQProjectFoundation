@@ -15,9 +15,11 @@ typedef void(^DDQTableViewDidSelectConfig)(NSIndexPath *indexPath);
 typedef CGFloat(^DDQTableViewHeaderHeightConfig)(NSInteger section);
 typedef CGFloat(^DDQTableViewFooterHeightConfig)(NSInteger section);
 typedef CGFloat(^DDQTableViewCellHeightConfig)(NSIndexPath *indexPath);
+typedef BOOL(^DDQTableViewCellCanEditingConfig)(NSIndexPath *indexPath);
 typedef __kindof UIView *_Nullable(^DDQTableViewHeaderViewConfig)(NSInteger section);
 typedef __kindof UIView *_Nullable(^DDQTableViewFooterViewConfig)(NSInteger section);
 typedef __kindof UITableViewCell *_Nonnull(^DDQTableViewCellConfig)(NSIndexPath *indexPath, UITableView *tableView);
+typedef void(^DDQTableViewCellCommitEditingConfig)(NSIndexPath *indexPath, UITableView *tableView, UITableViewCellEditingStyle style);
 
 /**
  基础TableView
@@ -70,6 +72,16 @@ typedef __kindof UITableViewCell *_Nonnull(^DDQTableViewCellConfig)(NSIndexPath 
  自定义Footer视图
  */
 - (void)tableView_setFooterViewConfig:(DDQTableViewFooterViewConfig)config;
+
+/**
+ 是否允许编辑
+ */
+- (void)tableView_setCellCanEditingConfig:(DDQTableViewCellCanEditingConfig)config;
+
+/**
+ 判断编辑状态
+ */
+- (void)tableView_setCellCommitEditingConfig:(DDQTableViewCellCommitEditingConfig)config;
 
 /**
  cell的点击事件

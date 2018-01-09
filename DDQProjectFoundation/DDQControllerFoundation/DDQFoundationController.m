@@ -473,7 +473,9 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
             BOOL isShow = handle(result, netCode);//数据处理完成
             if (isShow) {
                 
-                [weakObjc foundation_handleRequestedWithHud:waitHud message:netMessage code:DDQFoundationRequestFailure hidden:YES alertHandler:alert];
+                [weakObjc foundation_handleRequestedWithHud:waitHud message:netMessage code:netCode hidden:YES alertHandler:alert];
+            } else {
+                [waitHud hideAnimated:YES afterDelay:[weakObjc foundation_getWaitHUDHiddenTime]];
             }
         }
         
@@ -485,6 +487,8 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
             if (isShow) {
                 
                 [weakObjc foundation_handleRequestedWithHud:waitHud message:errDic[DDQFoundationRequestFailureDesc] code:DDQFoundationRequestFailure hidden:YES alertHandler:alert];
+            } else {
+                [waitHud hideAnimated:YES afterDelay:[weakObjc foundation_getWaitHUDHiddenTime]];
             }
         }
     }];
@@ -746,7 +750,23 @@ static const char *HUDKey = "com.ddq.foundation.defaultHUD";
     NSScanner *scanner = [[NSScanner alloc] initWithString:code];
     int value;
     BOOL isInt = [scanner scanInt:&value];
-    return isInt;
+    return isInt && [scanner isAtEnd];
+}
+
+- (BOOL)foundation_checkIntWithString:(NSString *)intString {
+    
+    NSScanner *scanner = [[NSScanner alloc] initWithString:intString];
+    int value;
+    BOOL isInt = [scanner scanInt:&value];
+    return isInt && [scanner isAtEnd];
+}
+
+- (BOOL)foundation_checkFloatWithString:(NSString *)floatString {
+    
+    NSScanner *scanner = [[NSScanner alloc] initWithString:floatString];
+    float value;
+    BOOL isFloat = [scanner scanFloat:&value];
+    return isFloat && [scanner isAtEnd];
 }
 
 @end

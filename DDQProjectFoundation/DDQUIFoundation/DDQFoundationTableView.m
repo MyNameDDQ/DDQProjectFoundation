@@ -19,7 +19,8 @@
 @property (nonatomic, copy) DDQTableViewFooterViewConfig footerViewConfig;
 @property (nonatomic, copy) DDQTableViewHeaderHeightConfig headerHeightConfig;
 @property (nonatomic, copy) DDQTableViewFooterHeightConfig footerHeightConfig;
-
+@property (nonatomic, copy) DDQTableViewCellCanEditingConfig canConfig;
+@property (nonatomic, copy) DDQTableViewCellCommitEditingConfig commitConfig;
 @end
 
 @implementation DDQFoundationTableView
@@ -112,6 +113,16 @@
     if (config) self.selectConfig = config;
 }
 
+- (void)tableView_setCellCanEditingConfig:(DDQTableViewCellCanEditingConfig)config {
+    
+    if (config) self.canConfig = config;
+}
+
+- (void)tableView_setCellCommitEditingConfig:(DDQTableViewCellCommitEditingConfig)config {
+    
+    if (config) self.commitConfig = config;
+}
+
 #pragma mark - TableView Delegate && DataSource
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
@@ -167,7 +178,7 @@
     if (self.headerViewConfig) {
         return self.headerViewConfig(section);
     }
-    return [[UIView alloc] initWithFrame:CGRectZero];
+    return self.tableView_layout.layout_headerView;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
@@ -175,12 +186,23 @@
     if (self.footerViewConfig) {
         return self.footerViewConfig(section);
     }
-    return [[UIView alloc] initWithFrame:CGRectZero];
+    return self.tableView_layout.layout_footerView;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (self.selectConfig) self.selectConfig(indexPath);
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (self.canConfig) return self.canConfig(indexPath);
+    return NO;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (self.commitConfig) self.commitConfig(indexPath, tableView, editingStyle);
 }
 
 @end

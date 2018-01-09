@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name         = 'DDQProjectFoundation'
-  s.version      = '1.2.4.1'
+  s.version      = '1.2.5'
   s.ios.deployment_target = '8.0'
   s.summary      = 'Easy Inherit'
   s.homepage     = 'https://github.com/MyNameDDQ/DDQProjectFoundation.git'
@@ -20,6 +20,7 @@ Pod::Spec.new do |s|
   s.dependency 'MJRefresh'
   s.dependency 'MJExtension'
   s.dependency 'MBProgressHUD'
+  s.dependency 'FMDB'
   s.dependency 'WebViewJavascriptBridge', '~> 4.1.5'
 
   s.subspec 'DDQFoundationDefine' do |define|

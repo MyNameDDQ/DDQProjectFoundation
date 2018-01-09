@@ -32,7 +32,7 @@
     
     CGSize boundSize = CGSizeMake(CGRectGetWidth(self.frame), 100000.0);
     CGSize titleSize = [self.placeholder_titleLabel.text boundingRectWithSize:boundSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:self.placeholder_titleLabel.font.pointSize + 1.0]} context:nil].size;
-    self.placeholder_titleLabel.frame = CGRectMake(viewCenterX - titleSize.width * 0.6, viewCenterY - titleSize.height + 2.0, titleSize.width, titleSize.height);
+    self.placeholder_titleLabel.frame = CGRectMake(viewCenterX - titleSize.width * 0.5, viewCenterY - titleSize.height + 2.0, titleSize.width, titleSize.height);
     
     CGSize subTitleSize = [self.placeholder_subTitleLabel.text boundingRectWithSize:boundSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:self.placeholder_subTitleLabel.font.pointSize + 1.0]} context:nil].size;
     self.placeholder_subTitleLabel.frame = CGRectMake(viewCenterX - subTitleSize.width * 0.5, viewCenterY + 2.0, subTitleSize.width, subTitleSize.height);
@@ -78,6 +78,7 @@
     [self.placeholder_alertButton setTitle:@"点击重试" forState:UIControlStateNormal];
     self.placeholder_alertButton.backgroundColor = [UIColor blackColor];
     self.placeholder_alertButton.titleLabel.font = [UIFont systemFontOfSize:15.0];
+    [self.placeholder_alertButton addTarget:self action:@selector(placeholder_buttonSelectSel:) forControlEvents:UIControlEventTouchUpInside];
     
     //KVO
     [self.placeholder_titleLabel addObserver:self forKeyPath:@"text" options:NSKeyValueObservingOptionNew context:nil];

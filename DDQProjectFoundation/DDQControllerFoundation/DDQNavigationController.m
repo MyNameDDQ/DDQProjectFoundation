@@ -5,8 +5,11 @@
 
 #import "DDQNavigationController.h"
 
-@interface DDQNavigationController () {
+#import <objc/runtime.h>
+
+@interface DDQNavigationController ()<UIGestureRecognizerDelegate> {
     
+    id _systemEdgePanDelegate;
     UIViewController *_rootViewController;
     UIStatusBarStyle _barStyle;
 }
@@ -16,6 +19,18 @@
 @implementation DDQNavigationController
 
 DDQExcptionName const DDQInvalidArgumentException = @"DDQExcption.invalidArgument";
+
+- (void)viewDidLoad {
+    
+    [super viewDidLoad];
+    
+    self.interactivePopGestureRecognizer.delegate = self;
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    
+    return YES;
+}
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
     

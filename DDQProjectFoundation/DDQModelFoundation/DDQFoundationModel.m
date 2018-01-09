@@ -62,6 +62,11 @@
         ignoredArr = [self performSelector:@selector(model_handlerIgnoredProperty)];
     }
     
+    NSDictionary *replaceDic = nil;
+    if ([self respondsToSelector:@selector(model_handlerReplaceProperty)]) {
+        replaceDic = [self performSelector:@selector(model_handlerReplaceProperty)];
+    }
+    
     for (int index = 0; index < listCount; index++) {
         
         objc_property_t property = propertys[index];
@@ -69,6 +74,10 @@
         
         if ([ignoredArr containsObject:propertyName] && ignoredArr) {
             continue;
+        }
+        
+        if ([replaceDic.allKeys containsObject:propertyName]) {
+            propertyName = replaceDic[propertyName];
         }
         
         NSDictionary *propertyAttr = [self base_handlePropertyAttribute:[[NSString alloc] initWithUTF8String:property_getAttributes(property)]];
@@ -130,8 +139,15 @@ static NSString *const PropertyAttribute = @"JFModelAttrName";
         Class propertyClass = NSClassFromString(attrDic[PropertyClass]);
         if ([propertyClass isSubclassOfClass:[NSObject class]]) {//OC子类
             
+            if ([NSStringFromClass(propertyClass) isEqualToString:@"NSNull"]) {
+                
+                [self setValue:@"" forKey:remainedKey];
+                
+            } else {
+                
+                [self setValue:[[propertyClass alloc] init] forKey:remainedKey];
+            }
 //            NSString *propertyAttr = attrDic[PropertyAttribute];
-            [self setValue:[[propertyClass alloc] init] forKey:remainedKey];
 //            if ([propertyAttr isEqualToString:@"C"]) {//copy
 //
 //                NSSet *set = [self model_propertyAttrFollowProtocalWithClass:propertyClass];

@@ -68,7 +68,7 @@
     CGSize imageSize = self.item_imageView.image.size;
     CGFloat superCenterX = CGRectGetMidX(self.bounds);
     CGFloat superCenterY = CGRectGetMidY(self.bounds);
-    self.item_imageView.frame = CGRectMake(superCenterX - imageSize.width * 0.5, superCenterY - imageSize.height * 0.75 - self.item_imageOffsetY - self.item_controlSpace, imageSize.width, imageSize.height);
+    self.item_imageView.frame = CGRectMake(superCenterX - imageSize.width * 0.5, superCenterY - imageSize.height * 0.75 - self.item_imageOffsetY, imageSize.width, imageSize.height);
     
     CGSize boundSize = CGSizeMake(CGRectGetWidth(self.bounds), 10000.0);
     CGSize titleSize = [self.item_titleLabel.text boundingRectWithSize:boundSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:self.item_titleLabel.font.pointSize + 1.0]} context:nil].size;

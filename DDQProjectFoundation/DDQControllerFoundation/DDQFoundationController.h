@@ -371,12 +371,24 @@ typedef MBProgressHUD *_Nullable(^_Nullable DDQFoundationRequestHUDHandle)(void)
 /**
  检查验证码的准确性
  */
-- (BOOL)foundation_checkMessageCode:(NSString *)code;
+- (BOOL)foundation_checkMessageCode:(NSString *)code DDQ_DEPRECATED_V(1_0, 1_0, "Please use foundation_checkIntWithString:");
 
 /**
  检查邮箱的准确性
  */
 - (BOOL)foundation_checkEmail:(NSString *)mail;
+
+/**
+ 检查是不是纯Int字符串
+ 可以用作检查：验证码
+ */
+- (BOOL)foundation_checkIntWithString:(NSString *)intString;
+
+/**
+ 检查是不是纯Float字符串
+ 可以用作检查：价格
+ */
+- (BOOL)foundation_checkFloatWithString:(NSString *)floatString;
 
 @end
 

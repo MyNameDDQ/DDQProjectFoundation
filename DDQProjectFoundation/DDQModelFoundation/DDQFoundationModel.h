@@ -21,6 +21,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable NSArray *)model_handlerIgnoredProperty;
 
+/**
+ 被替换的属性名称
+ */
+- (NSDictionary *)model_handlerReplaceProperty;
+
 @end
 
 /**
