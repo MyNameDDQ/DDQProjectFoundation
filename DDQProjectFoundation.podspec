@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name         = 'DDQProjectFoundation'
-  s.version      = '1.2.5'
+  s.version      = '1.2.6'
   s.ios.deployment_target = '8.0'
   s.summary      = 'Easy Inherit'
   s.homepage     = 'https://github.com/MyNameDDQ/DDQProjectFoundation.git'
@@ -35,6 +35,8 @@ Pod::Spec.new do |s|
     ui.source_files = 'DDQProjectFoundation/DDQUIFoundation/*.{h,m}'
     ui.public_header_files = 'DDQProjectFoundation/DDQUIFoundation/*.h'
     ui.dependency 'DDQProjectFoundation/DDQFoundationDefine'
+    ui.dependency 'DDQProjectFoundation/DDQCategoryFoundation'
+    ui.dependency 'DDQProjectFoundation/DDQModelFoundation'
 
   end
 
