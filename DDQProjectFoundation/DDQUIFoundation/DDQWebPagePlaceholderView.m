@@ -1,6 +1,5 @@
 //
 //  DDQWebPagePlaceholderView.m
-//  DDQProjectEdit
 //
 //  Copyright © 2017年 DDQ. All rights reserved.
 

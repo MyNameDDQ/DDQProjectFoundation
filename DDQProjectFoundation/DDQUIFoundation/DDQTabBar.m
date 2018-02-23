@@ -1,9 +1,7 @@
 //
 //  DDQTabBar.m
-//  TimeSpace
 //
 //  Copyright © 2017年 DDQ. All rights reserved.
-
 
 #import "DDQTabBar.h"
 

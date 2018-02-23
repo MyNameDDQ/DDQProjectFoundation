@@ -3,8 +3,7 @@
 //
 //  Copyright © 2017年 DDQ. All rights reserved.
 
-
-#import <UIKit/UIKit.h>
+#import "UIView+DDQControlInitialize.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
