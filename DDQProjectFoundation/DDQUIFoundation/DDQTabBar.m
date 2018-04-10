@@ -7,18 +7,27 @@
 
 #import "DDQBarItem.h"
 
-@interface DDQTabBar ()<DDQBarItemDelegate>
+@interface DDQTabBar ()<DDQBarItemDelegate> {
+    
+    NSInteger lastIndex;
+}
 
 @property (nonatomic, strong) DDQBarItem *tempItem;
+
+
 @end
 
 @implementation DDQTabBar
 
-@synthesize bar_currentIndex = _bar_currentIndex;
-
 - (id)copyWithZone:(NSZone *)zone {
 
-    return [[DDQTabBar allocWithZone:zone] init];
+    DDQTabBar *bar = [[DDQTabBar allocWithZone:zone] init];
+    bar.bar_items = self.bar_items;
+    bar.bar_currentIndex = self.bar_currentIndex;
+    bar.delegate = self.delegate;
+    bar.bar_backgroundImageView = self.bar_backgroundImageView;
+    return bar;
+    
 }
 
 + (instancetype)tabBarWithFrame:(CGRect)frame {
@@ -35,10 +44,29 @@
     [self addSubview:self.bar_backgroundImageView];
     self.bar_backgroundImageView.userInteractionEnabled = YES;
     self.bar_backgroundImageView.contentMode = UIViewContentModeScaleAspectFill;
+    
+    [self addObserver:self forKeyPath:@"tempItem" options:NSKeyValueObservingOptionOld context:nil];
     return self;
+    
 }
 
-- (void)setBar_currentIndex:(NSUInteger)bar_currentIndex {
+- (void)dealloc {
+    
+    [self removeObserver:self forKeyPath:@"tempItem"];
+    
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    
+    if ([keyPath isEqualToString:@"tempItem"] && ![change[NSKeyValueChangeOldKey] isEqual:[NSNull null]]) {
+        
+        DDQBarItem *lastItem = [change valueForKey:NSKeyValueChangeOldKey];
+        lastIndex = lastItem.tag;
+        
+    }
+}
+
+- (void)setBar_currentIndex:(NSInteger)bar_currentIndex {
 
     _bar_currentIndex = bar_currentIndex;
     
@@ -53,11 +81,13 @@
     self.tempItem.item_selected = NO;
     item.item_selected = YES;
     self.tempItem = item;
+    
 }
 
-- (NSUInteger)barCurrentIndex {
-
-    return self.tempItem.tag;
+- (NSInteger)bar_lastIndex {
+    
+    return lastIndex;
+    
 }
 
 - (void)setBar_items:(NSArray<DDQBarItem *> *)bar_items {
@@ -72,6 +102,7 @@
         if (index == 0) {
             item.item_selected = YES;
             self.tempItem = item;
+            self.bar_currentIndex = index;
         }
         [self addSubview:item];
     }

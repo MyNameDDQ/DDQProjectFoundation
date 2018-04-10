@@ -5,6 +5,8 @@
 
 #import "UIView+DDQControlInitialize.h"
 
+#import <objc/runtime.h>
+
 @implementation UIView (DDQControlInitialize)
 
 const DDQViewVHSpace DDQViewVHSpaceZero = {0, 0};
@@ -126,6 +128,10 @@ static const char *DrawLayer = "view.drawLayer";
     return CGRectGetMidY(self.frame);
 }
 
+- (CGSize)size {
+    return self.frame.size;
+}
+
 #pragma mark - Initialize Method
 + (UIView *)view {
     
@@ -213,7 +219,7 @@ static const char *BoundRect = "Bound.Rect";
 - (void)view_removeSubviews:(NSArray<__kindof UIView *> *)views {
     
     for (UIView *view in views) {
-        if (![self.subviews containsObject:view]) {
+        if ([self.subviews containsObject:view]) {
             [view removeFromSuperview];
         }
     }
@@ -235,7 +241,7 @@ static const char *BoundRect = "Bound.Rect";
     DDQRateSet rateSet = [UIView view_getCurrentDeviceRateWithVersion:DDQFoundationRateDevice_iPhone6];
     CGFloat pointSize = 0.0;
     //当前屏幕类型判断
-    if (currentVersion == DDQFoundationRateDevice_iPhone6) {//iPhone6下大小不变
+    if (currentVersion >= DDQFoundationRateDevice_iPhone6) {//iPhone6及以上屏幕大小不变
         pointSize = defaultSize;
     } else {
         pointSize = ceil((defaultSize * 2.0 * rateSet.widthRate) * 0.5);
@@ -260,6 +266,7 @@ static const char *BoundRect = "Bound.Rect";
     
     UIImageView *imageView = [UIImageView imageView];
     if (image) imageView.image = image;
+    [imageView sizeToFit];
     return imageView;
 }
 
@@ -278,20 +285,39 @@ static const char *BoundRect = "Bound.Rect";
 
 - (CGSize)label_boundWithMaxSize:(CGSize)mSize attributes:(NSDictionary<NSAttributedStringKey,id> *)attrs {
     
+//    CGSize boundSize = (CGSizeEqualToSize(mSize, CGSizeZero)) ? CGSizeMake(10000.0, 10000.0) : mSize;
+//    if (attrs.count > 0) {
+//
+//        return [self.text boundingRectWithSize:boundSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:attrs context:nil].size;
+//
+//    }
+//
+//    return [self sizeThatFits:boundSize];
+    
     NSDictionary *sizeAttrs = nil;
     if (attrs.count > 0) {
         sizeAttrs = attrs;
     } else {
-        sizeAttrs = @{NSFontAttributeName:[UIFont systemFontOfSize:self.font.pointSize]};
+        sizeAttrs = @{NSFontAttributeName:[UIFont systemFontOfSize:self.font.pointSize + 0.5]};
     }
     
-    CGSize boundSize = (CGSizeEqualToSize(mSize, CGSizeZero)) ? CGSizeMake(10000.0, 10000.0) : mSize;
-    return [self.text boundingRectWithSize:boundSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:sizeAttrs context:nil].size;
+    CGSize boundSize = [self.text boundingRectWithSize:mSize options:NSStringDrawingUsesLineFragmentOrigin attributes:sizeAttrs context:nil].size;
+    return CGSizeMake(ceil(boundSize.width), ceil(boundSize.height));
+    
+}
+
+- (CGSize)label_boundWithMaxSize:(CGSize)mSize options:(NSStringDrawingOptions)options {
+    
+    NSDictionary *sizeAttrs = @{NSFontAttributeName:[UIFont systemFontOfSize:self.font.pointSize + 0.5]};
+    CGSize boundSize = [self.text boundingRectWithSize:mSize options:options attributes:sizeAttrs context:nil].size;
+    return CGSizeMake(ceil(boundSize.width), ceil(boundSize.height));
+    
 }
 
 - (CGSize)label_boundAttributeTextSize {
     
     return [self.attributedText size];
+    
 }
 
 @end
@@ -307,7 +333,7 @@ static const char *BoundRect = "Bound.Rect";
     if (backgroundImage && ![button imageForState:UIControlStateNormal]) [button setBackgroundImage:backgroundImage forState:UIControlStateNormal];
     if (title.length > 0) [button setTitle:title forState:UIControlStateNormal];
     if (attrTitle && [button titleForState:UIControlStateNormal].length == 0) [button setAttributedTitle:attrTitle forState:UIControlStateNormal];
-    [button addTarget:target action:sel forControlEvents:UIControlEventTouchUpInside];
+    if (target && sel) [button addTarget:target action:sel forControlEvents:UIControlEventTouchUpInside];
     return button;
 }
 
@@ -318,7 +344,7 @@ static const char *BoundRect = "Bound.Rect";
 + (instancetype)fieldChangeFont:(UIFont *)font textColor:(UIColor *)color placeholder:(NSString *)placeholder attributePlaceholder:(NSAttributedString *)attrPlaceholder {
     
     UITextField *filed = [UITextField textField];
-    if (font) filed.font = font;
+    if (font) filed.font = [filed view_handlePointSizeWithDefaultSize:font.pointSize];
     if (color) filed.textColor = color;
     if (placeholder.length > 0) filed.placeholder = placeholder;
     if (attrPlaceholder && filed.placeholder.length == 0) filed.attributedPlaceholder = attrPlaceholder;
@@ -333,6 +359,7 @@ static const char *BoundRect = "Bound.Rect";
     
     DDQFoundationTableView *tableView = [DDQFoundationTableView tableViewWithStyle:style];
     return tableView;
+    
 }
 
 @end
@@ -342,11 +369,15 @@ static const char *BoundRect = "Bound.Rect";
 static const char *IsDefault = "Is.Default";
 static const char *Extension = "Extension";
 - (void)setIsDefault:(BOOL)isDefault {
+    
     objc_setAssociatedObject(self, IsDefault, [NSNumber numberWithBool:isDefault], OBJC_ASSOCIATION_RETAIN);
+    
 }
 
 - (BOOL)isDefault {
+    
     return [objc_getAssociatedObject(self, IsDefault) boolValue];
+    
 }
 
 - (void)setImage_extension:(NSString *)image_extension {
@@ -357,6 +388,7 @@ static const char *Extension = "Extension";
 - (NSString *)image_extension {
     
     return objc_getAssociatedObject(self, Extension);
+    
 }
 
 @end
@@ -366,22 +398,26 @@ static const char *Extension = "Extension";
 - (UIColor *)defaultBlackColor {
     
     return kSetColor(51.0, 51.0, 51.0, 1.0);
+    
 }
 
 - (UIColor *)defaultRedColor {
     
     return kSetColor(230.0, 17.0, 40.0, 1.0);
+    
 }
 
 - (UIColor *)defaultGrayColor {
     
     return kSetColor(153.0, 153.0, 153.0, 1.0);
+    
 }
 
 - (CGFloat)defaultWidthRate {
     
     DDQRateSet rateSet = [UIView view_getCurrentDeviceRateWithVersion:DDQFoundationRateDevice_iPhone6];
     return rateSet.widthRate;
+    
 }
 
 - (CGSize)imageViewImageSize {
@@ -392,6 +428,7 @@ static const char *Extension = "Extension";
         return imageView.image.size;
     }
     return CGSizeZero;
+    
 }
 
 @end

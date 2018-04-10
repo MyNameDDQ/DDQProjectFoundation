@@ -4,7 +4,7 @@
 //
 //  Copyright © 2017年 DDQ. All rights reserved.
 
-#import "UIView+DDQControlInitialize.h"
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 @protocol DDQBarItemDelegate;
@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param sImage 已选中状态下的图片
  @param title item的文字
  */
-- (instancetype)initWithNormalImage:(nullable UIImage *)nImage selectedImage:(nullable UIImage *)sImage normalTitle:(nullable NSString *)title;
+- (instancetype)initWithNormalImage:(nullable UIImage *)nImage selectedImage:(nullable UIImage *)sImage normalTitle:(nullable NSString *)title NS_DESIGNATED_INITIALIZER;
 
 /**
  设置选中和未选中时的文字颜色

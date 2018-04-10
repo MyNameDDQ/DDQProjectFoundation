@@ -22,6 +22,12 @@ NSString *const DDQLayoutDefaultCellIdentifier = @"com.ddq.default.cellIdentifie
     return [DDQFoundationTableViewLayout layoutWithTableView:_targetTableView];
 }
 
+- (void)dealloc {
+    
+    _targetTableView = nil;
+    
+}
+
 + (instancetype)layoutWithTableView:(__kindof UITableView *)table {
     
     return [[self alloc] initWithTableView:table];

@@ -20,30 +20,6 @@
     return object;
 }
 
-//- (void)setValue:(id)value forKey:(NSString *)key {
-//    
-//    [super setValue:[self base_checkModelValue:value] forKey:key];
-//}
-//
-///**
-// 判断赋值是否为空
-// 
-// @param value 判断的值
-// @return 处理后的结果
-// */
-//- (NSObject *)base_checkModelValue:(id)value {
-//    
-//    if (!value || [value isKindOfClass:[NSNull class]]) {
-//        
-//        if ([value isKindOfClass:[NSObject class]]) {
-//            return [[[value class] alloc] init];
-//        } else {
-//            return [[NSObject alloc] init];
-//        }
-//    }
-//    return value;
-//}
-
 /**
  读取模型类中的所有属性名称
  
@@ -62,11 +38,6 @@
         ignoredArr = [self performSelector:@selector(model_handlerIgnoredProperty)];
     }
     
-    NSDictionary *replaceDic = nil;
-    if ([self respondsToSelector:@selector(model_handlerReplaceProperty)]) {
-        replaceDic = [self performSelector:@selector(model_handlerReplaceProperty)];
-    }
-    
     for (int index = 0; index < listCount; index++) {
         
         objc_property_t property = propertys[index];
@@ -74,10 +45,6 @@
         
         if ([ignoredArr containsObject:propertyName] && ignoredArr) {
             continue;
-        }
-        
-        if ([replaceDic.allKeys containsObject:propertyName]) {
-            propertyName = replaceDic[propertyName];
         }
         
         NSDictionary *propertyAttr = [self base_handlePropertyAttribute:[[NSString alloc] initWithUTF8String:property_getAttributes(property)]];
@@ -117,16 +84,67 @@ static NSString *const PropertyAttribute = @"JFModelAttrName";
     //已被转化的key
     NSMutableDictionary *valueDic = [self mj_keyValues];
     NSArray *ignoredArr = @[@"description", @"debugDescription", @"hash", @"superclass"];
-    for (NSString *ignoredKey in ignoredArr) {
-        
-        if ([valueDic valueForKey:ignoredKey]) {
-            [valueDic removeObjectForKey:ignoredKey];
-        }
-    }
+    [valueDic removeObjectsForKeys:ignoredArr];
     NSArray *allKeyArr = [valueDic allKeys];
     
     //全部的key
     NSDictionary *propertyListDic = [self base_loadClassPropertyList];
+    for (NSString *key in propertyListDic.allKeys) {//检查所有属性中被转化过的属性
+        
+        if ([allKeyArr containsObject:key]) {//找到已经被转化过的属性
+         
+            @try {
+                
+                id objecValue = [self valueForKey:key];
+                NSDictionary *propertyAttr = propertyListDic[key];
+                Class attrClass = NSClassFromString([propertyAttr objectForKey:PropertyClass]);
+                if ([attrClass isSubclassOfClass:[NSString class]]) {//属性是不是NSString及其子类
+                    
+                    if (![[objecValue class] isSubclassOfClass:[NSString class]]) {//赋值的属性不是字符串及其子类
+                        
+                        [self setValue:[objecValue description] forKey:key];
+                        
+                    }
+                }
+                
+                if ([[objecValue class] isSubclassOfClass:[NSNull class]] && [attrClass isSubclassOfClass:[NSObject class]]) {//赋值的是NSNull，且属性指向NSObject及其子类
+                    
+                    [self setValue:[[attrClass alloc] init] forKey:key];
+                    
+                }
+            } @catch (NSException *exception) {
+                
+                NSLog(@"%@", exception);
+                
+            } @finally {
+                
+                continue;
+                
+            }
+        }
+    }
+    
+    //属性替换
+    NSDictionary *replaceDic = nil;
+    if ([self respondsToSelector:@selector(model_handlerReplaceProperty)]) {
+        
+        replaceDic = [self performSelector:@selector(model_handlerReplaceProperty)];
+        //转化字典里所有的value即是被mj真正转化的服务器返回的属性名
+        for (NSString *replaceKey in replaceDic.allKeys) {
+            
+            NSString *assignKey = [replaceDic valueForKey:replaceKey];
+            if ([allKeyArr containsObject:assignKey]) {
+                
+                id object = [valueDic objectForKey:assignKey];
+                [valueDic removeObjectForKey:assignKey];
+                [valueDic setObject:object forKey:replaceKey];
+                
+            }
+        }
+        allKeyArr = valueDic.allKeys;
+        
+    }
+
     
     //未被转化的key
     NSPredicate *resultPre = [NSPredicate predicateWithFormat:@"NOT (SELF in %@)", allKeyArr];
@@ -137,31 +155,22 @@ static NSString *const PropertyAttribute = @"JFModelAttrName";
         
         NSDictionary *attrDic = propertyListDic[remainedKey];
         Class propertyClass = NSClassFromString(attrDic[PropertyClass]);
+
         if ([propertyClass isSubclassOfClass:[NSObject class]]) {//OC子类
             
-            if ([NSStringFromClass(propertyClass) isEqualToString:@"NSNull"]) {
-                
-                [self setValue:@"" forKey:remainedKey];
-                
-            } else {
+            @try {
                 
                 [self setValue:[[propertyClass alloc] init] forKey:remainedKey];
+                    
+            } @catch (NSException *exception) {
+                
+                NSLog(@"%@", exception);
+                
+            } @finally {
+                
+                continue;
+                
             }
-//            NSString *propertyAttr = attrDic[PropertyAttribute];
-//            if ([propertyAttr isEqualToString:@"C"]) {//copy
-//
-//                NSSet *set = [self model_propertyAttrFollowProtocalWithClass:propertyClass];
-//
-//                if ([set.allObjects containsObject:@"NSCopying"]) {//该类遵循NSCopying协议
-//                    [self setValue:[[propertyClass alloc] init] forKey:remainedKey];
-//                } else {//该类不支持NSCopying协议，但属性修饰词却是copy
-//
-//                    NSString *excTip = [NSString stringWithFormat:@"%@没有遵循NSCopying协议", propertyClass];
-//                    NSException *exc = [NSException exceptionWithName:NSInvalidArgumentException reason:excTip userInfo:nil];
-//                    [exc raise];
-//                }
-//            } else {//strong,weak
-//            }
         } else {//基础数据类型
             
             //可不用实现，基础数据类型，为空时取值时0。而且MJ也做了相关处理
@@ -170,7 +179,7 @@ static NSString *const PropertyAttribute = @"JFModelAttrName";
 }
 @end
 
-@implementation NSObject (DDQJFModelClass)
+@implementation NSObject (DDQModelClass)
 
 - (NSSet *)model_propertyAttrFollowProtocalWithClass:(Class)proClass {
     

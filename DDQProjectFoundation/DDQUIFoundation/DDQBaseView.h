@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param frame 视图大小
  */
-- (instancetype)initViewWithFrame:(CGRect)frame;
+- (instancetype)initViewWithFrame:(CGRect)frame NS_DESIGNATED_INITIALIZER;
 
 /** 是否已经布局过 */
 @property (nonatomic, readonly) BOOL view_layoutSubviews;
@@ -42,6 +42,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** 布局子视图 */
 - (void)view_subviewsConfig;
+
+/**
+ 是否执行过布局的方法:view_subviewsConfig
+ */
+@property (nonatomic, readonly) BOOL view_isConfig;
+
+/**
+ 是否使用预计算视图大小
+ 即view_boundRect,但不推荐使用因为是类目里的属性不方便debug
+ */
++ (BOOL)view_useBoundRectLayout;//default YES
 
 /**
  基础TableView

@@ -26,29 +26,20 @@
 
 - (instancetype)initWithFrame:(CGRect)frame {
     
-    self = [super initWithFrame:frame];
-    if (!self) return nil;
+    return [self initWithNormalImage:nil selectedImage:nil normalTitle:nil];
     
-    [self item_handleInitialze];
-    return self;
 }
 
 - (instancetype)init {
     
-    self = [super init];
-    if (!self) return nil;
+    return [self initWithNormalImage:nil selectedImage:nil normalTitle:nil];
     
-    [self item_handleInitialze];
-    return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     
-    self = [super initWithCoder:aDecoder];
-    if (!self) return nil;
+    return [self initWithNormalImage:nil selectedImage:nil normalTitle:nil];
     
-    [self item_handleInitialze];
-    return self;
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {

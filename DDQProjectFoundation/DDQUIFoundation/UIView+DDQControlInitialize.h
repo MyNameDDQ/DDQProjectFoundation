@@ -5,11 +5,9 @@
 
 #import "DDQFoundationTableView.h"
 #import "DDQFoundationTableViewLayout.h"
-
-#import "DDQFoundationDefine.h"
 #import "UIView+DDQSimplyGetViewProperty.h"
 
-#import <objc/runtime.h>
+#import "DDQFoundationDefine.h"
 
 NS_ASSUME_NONNULL_BEGIN
 //控件相对于父视图边缘的上下距离
@@ -57,6 +55,7 @@ UIKIT_EXTERN DDQViewVHMargin DDQViewVHMarginMaker(CGFloat v, CGFloat h);
 @property (nonatomic, assign, readonly) CGFloat frameMaxY;
 @property (nonatomic, assign, readonly) CGFloat frameMidX;
 @property (nonatomic, assign, readonly) CGFloat frameMidY;
+@property (nonatomic, assign, readonly) CGSize size;
 
 //Set View SuperView
 - (void)view_configSubviews:(NSArray<__kindof UIView *> *)views;
@@ -140,6 +139,15 @@ UIKIT_EXTERN DDQViewVHMargin DDQViewVHMarginMaker(CGFloat v, CGFloat h);
  */
 - (CGSize)label_boundWithMaxSize:(CGSize)mSize attributes:(nullable NSDictionary<NSAttributedStringKey, id> *)attrs;
 
+
+/**
+ 计算label的文字
+
+ @param mSize 最大的内容
+ @param options 计算时的选项
+ */
+- (CGSize)label_boundWithMaxSize:(CGSize)mSize options:(NSStringDrawingOptions)options;
+
 /**
  计算label的属性字符串的大小
 
@@ -151,7 +159,7 @@ UIKIT_EXTERN DDQViewVHMargin DDQViewVHMarginMaker(CGFloat v, CGFloat h);
 
 @interface UIButton (DDQButtonUpdate)
 
-+ (instancetype)buttonChangeFont:(nullable UIFont *)font titleColor:(nullable UIColor *)color image:(nullable UIImage *)image backgroundImage:(nullable UIImage *)backgroundImage title:(nullable NSString *)title attributeTitle:(nullable NSAttributedString *)attrTitle target:(nullable id)target sel:(SEL)sel;
++ (instancetype)buttonChangeFont:(nullable UIFont *)font titleColor:(nullable UIColor *)color image:(nullable UIImage *)image backgroundImage:(nullable UIImage *)backgroundImage title:(nullable NSString *)title attributeTitle:(nullable NSAttributedString *)attrTitle target:(nullable id)target sel:(nullable SEL)sel;
 
 @end
 

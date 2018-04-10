@@ -17,8 +17,6 @@
 @property (nonatomic, strong) NSMutableArray<__kindof UIViewController *> *bar_currentControllers;
 @property (nonatomic, strong) NSMutableDictionary *bar_itemDataSource;
 
-@property (nonatomic, strong) DDQBarItem *tab_tempItem;
-
 @end
 
 @implementation DDQTabBarController
@@ -45,11 +43,13 @@ DDQTabBarItemSourceKey const DDQTabBarItemSourceSelectedColor = @"item.selectedC
 - (BOOL)shouldAutorotate {
     
     return self.tab_rotate;
+    
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     
     return self.tab_orientationMask;
+    
 }
 
 - (void)viewWillLayoutSubviews {
@@ -72,6 +72,7 @@ DDQTabBarItemSourceKey const DDQTabBarItemSourceSelectedColor = @"item.selectedC
     [super setSelectedIndex:selectedIndex];
     
     self.tab_tabBar.bar_currentIndex = selectedIndex;
+    
 }
 
 #pragma mark - Custom Method
@@ -137,8 +138,7 @@ DDQTabBarItemSourceKey const DDQTabBarItemSourceSelectedColor = @"item.selectedC
     }
     
     self.tab_tabBar.bar_items = tempArray.copy;
-    self.tab_tempItem = tempArray.firstObject;
-    [self.tab_tempItem setItemSelected:YES];
+
 }
 
 /**
@@ -171,7 +171,7 @@ DDQTabBarItemSourceKey const DDQTabBarItemSourceSelectedColor = @"item.selectedC
     
     self.viewControllers = self.bar_currentControllers;
     if (!source) return;//数据源不为空
-    [self.bar_itemDataSource setObject:source forKey:@(navigationController.hash).stringValue];
+    [self.bar_itemDataSource setObject:source.copy forKey:@(navigationController.hash).stringValue];
 }
 
 - (void)setTab_managerControllers:(NSArray<__kindof UIViewController *> *)tab_managerControllers {
@@ -198,15 +198,8 @@ DDQTabBarItemSourceKey const DDQTabBarItemSourceSelectedColor = @"item.selectedC
 
 #pragma mark - CustomBar Delegate
 - (void)tabBar_didSelectWithItemIndex:(NSUInteger)index {
-    
-    DDQBarItem *selectedItem = self.tab_tabBar.bar_items[index];
-    
-    //判断当前点击的item是不是相同的
-    if (self.tab_tempItem == selectedItem) return;
-    
+
     self.selectedIndex = index;
-    [selectedItem setItemSelected:YES];
-    [self.tab_tempItem setItemSelected:NO];
-    self.tab_tempItem = selectedItem;
+
 }
 @end

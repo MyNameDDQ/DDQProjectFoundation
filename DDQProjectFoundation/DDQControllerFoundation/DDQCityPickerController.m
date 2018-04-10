@@ -23,6 +23,17 @@
 
 @implementation DDQCityPickerController
 
+- (instancetype)init {
+    
+    self = [super init];
+    
+    //Subviews
+    [self picker_layoutSubviews];
+
+    return self;
+    
+}
+
 - (void)viewDidLoad {
     
     [super viewDidLoad];
@@ -34,8 +45,6 @@
     //DataSource
     [self picker_reloadDataSource];
 
-    //Subviews
-    [self picker_layoutSubviews];
 }
 
 - (void)viewWillLayoutSubviews {

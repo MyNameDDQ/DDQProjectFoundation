@@ -24,6 +24,8 @@ struct DDQSeparatorMargin {
 typedef struct DDQSeparatorMargin DDQSeparatorMargin;
 UIKIT_EXTERN const DDQSeparatorMargin DDQSeparatorMarginZero;
 
+UIKIT_EXTERN DDQSeparatorMargin DDQSeparatorMarginMaker(CGFloat l, CGFloat r);
+
 /**
  工程Cell基类
  */
@@ -59,6 +61,17 @@ UIKIT_EXTERN const DDQSeparatorMargin DDQSeparatorMarginZero;
 - (void)cell_contentViewSubviewsConfig DDQ_REQUIRES_SUPER;
 
 /**
+ 是否执行过布局Cell的方法:cell_contentViewSubviewsConfig
+ */
+@property (nonatomic, readonly) BOOL cell_subviewsConfig;
+
+/**
+ 是否使用预计算视图大小
+ 即view_boundRect,但不推荐使用因为是类目里的属性不方便debug
+ */
++ (BOOL)cell_useBoundRectLayout;//default YES
+
+/**
  当前Cell上显示数据的Model
  PS:当cell_updateDataWithModel被调用后有值
  */
@@ -66,8 +79,9 @@ UIKIT_EXTERN const DDQSeparatorMargin DDQSeparatorMarginZero;
 
 /**
  更新Cell的数据
+ 你需要将子视图的赋值内容放在Super之前
  */
-- (void)cell_updateDataWithModel:(nullable __kindof DDQBaseCellModel *)model;
+- (void)cell_updateDataWithModel:(nullable __kindof DDQBaseCellModel *)model DDQ_REQUIRES_SUPER;
 
 /**
  获得Cell的高度

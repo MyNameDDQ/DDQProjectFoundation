@@ -6,8 +6,10 @@
 
 #import <UIKit/UIKit.h>
 
-@class DDQFoundationTableViewLayout;
 NS_ASSUME_NONNULL_BEGIN
+
+@class DDQFoundationTableViewLayout;
+@class DDQFoundationTableView;
 
 typedef NSInteger(^DDQTableViewSectionConfig)(void);
 typedef NSInteger(^DDQTableViewRowConfig)(NSInteger section);
@@ -16,10 +18,10 @@ typedef CGFloat(^DDQTableViewHeaderHeightConfig)(NSInteger section);
 typedef CGFloat(^DDQTableViewFooterHeightConfig)(NSInteger section);
 typedef CGFloat(^DDQTableViewCellHeightConfig)(NSIndexPath *indexPath);
 typedef BOOL(^DDQTableViewCellCanEditingConfig)(NSIndexPath *indexPath);
-typedef __kindof UIView *_Nullable(^DDQTableViewHeaderViewConfig)(NSInteger section);
-typedef __kindof UIView *_Nullable(^DDQTableViewFooterViewConfig)(NSInteger section);
-typedef __kindof UITableViewCell *_Nonnull(^DDQTableViewCellConfig)(NSIndexPath *indexPath, UITableView *tableView);
-typedef void(^DDQTableViewCellCommitEditingConfig)(NSIndexPath *indexPath, UITableView *tableView, UITableViewCellEditingStyle style);
+typedef __kindof UIView *_Nullable(^DDQTableViewHeaderViewConfig)(NSInteger section, DDQFoundationTableView *tableView);
+typedef __kindof UIView *_Nullable(^DDQTableViewFooterViewConfig)(NSInteger section, DDQFoundationTableView *tableView);
+typedef __kindof UITableViewCell *_Nonnull(^DDQTableViewCellConfig)(NSIndexPath *indexPath, DDQFoundationTableView *tableView);
+typedef void(^DDQTableViewCellCommitEditingConfig)(NSIndexPath *indexPath, DDQFoundationTableView *tableView, UITableViewCellEditingStyle style);
 
 /**
  基础TableView
@@ -30,8 +32,13 @@ typedef void(^DDQTableViewCellCommitEditingConfig)(NSIndexPath *indexPath, UITab
 /**
  TableView的布局设置
  */
-@property (nonatomic, strong, setter=tableView_configLayout:) DDQFoundationTableViewLayout *tableView_layout;
+@property (nonatomic, strong, readonly) DDQFoundationTableViewLayout *tableView_layout;
 - (void)tableView_configLayout:(DDQFoundationTableViewLayout *)layout;
+
+/**
+ 2018-3-13 修复tableView不被dealloc的问题
+ */
+- (void)tableView_dealloc;
 
 /**
  自定义分区数

@@ -6,15 +6,16 @@
 
 #import <UIKit/UIKit.h>
 
+#import "DDQTabBar.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NSString *DDQTabBarItemSourceKey;
-@class DDQTabBar;
 
 /**
  自定义标签控制器
  */
-@interface DDQTabBarController : UITabBarController
+@interface DDQTabBarController : UITabBarController <DDQTabBarDelegate>
 
 /**
  初始化方法

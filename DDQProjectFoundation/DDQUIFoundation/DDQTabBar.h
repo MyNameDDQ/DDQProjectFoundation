@@ -3,7 +3,7 @@
 //
 //  Copyright © 2017年 DDQ. All rights reserved.
 
-#import "UIView+DDQControlInitialize.h"
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 @class DDQBarItem;
@@ -29,7 +29,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  当前索引
  */
-@property (nonatomic, assign) NSUInteger bar_currentIndex;
+@property (nonatomic, assign) NSInteger bar_currentIndex;//default 0
+
+/**
+ 上一次点击的索引
+ */
+@property (nonatomic, assign, readonly) NSInteger bar_lastIndex;//default 0
 
 /**
  设置的Item

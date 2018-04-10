@@ -25,6 +25,8 @@
 
 @implementation DDQFoundationTableView
 
+@synthesize tableView_layout = _tableView_layout;
+
 - (void)dealloc {
     
     if (self.delegate) self.delegate = nil;
@@ -66,6 +68,12 @@
     
     if (!self.delegate) self.delegate = self;
     if (!self.dataSource) self.dataSource = self;
+}
+
+- (void)tableView_dealloc {
+    
+    _tableView_layout = nil;
+    
 }
 
 - (void)tableView_setSectionConfig:(DDQTableViewSectionConfig)config {
@@ -144,7 +152,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (self.cellConfig) {
-        return self.cellConfig(indexPath, tableView);
+        return self.cellConfig(indexPath, self);
     }
     return [tableView dequeueReusableCellWithIdentifier:self.tableView_layout.layout_cellIdentifier forIndexPath:indexPath];
 }
@@ -155,6 +163,7 @@
         return self.cellHeightConfig(indexPath);
     }
     return self.tableView_layout.layout_rowHeight;
+
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
@@ -176,7 +185,7 @@
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
     
     if (self.headerViewConfig) {
-        return self.headerViewConfig(section);
+        return self.headerViewConfig(section, self);
     }
     return self.tableView_layout.layout_headerView;
 }
@@ -184,7 +193,7 @@
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
     
     if (self.footerViewConfig) {
-        return self.footerViewConfig(section);
+        return self.footerViewConfig(section, self);
     }
     return self.tableView_layout.layout_footerView;
 }
@@ -202,7 +211,7 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if (self.commitConfig) self.commitConfig(indexPath, tableView, editingStyle);
+    if (self.commitConfig) self.commitConfig(indexPath, self, editingStyle);
 }
 
 @end

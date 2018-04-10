@@ -109,6 +109,7 @@ typedef NS_ENUM(NSUInteger, DDQFoundationRequestErrorCode) {
  @param sel 点击事件
  */
 - (void)foundation_setRightItemFrame:(CGRect)frame Style:(DDQFoundationBarButtonStyle)style Content:(id)content Selector:(SEL)sel;
+- (void)foundation_setRightItemWithStyle:(DDQFoundationBarButtonStyle)style Content:(id)content Selector:(SEL)sel;
 
 @end
 

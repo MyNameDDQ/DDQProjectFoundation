@@ -3,7 +3,7 @@
 //
 //  Copyright © 2017年 DDQ. All rights reserved.
 
-#import "UIView+DDQControlInitialize.h"
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -12,10 +12,10 @@ typedef NS_ENUM(NSUInteger, DDQAlertItemStyle) {
     DDQAlertItemStyleCustom,        //一个自定义的类型
 };
 @protocol DDQAlertItemDelegate;
+
 /**
  AlertController的Item
  */
-
 @interface DDQAlertItem : UIView
 
 /**

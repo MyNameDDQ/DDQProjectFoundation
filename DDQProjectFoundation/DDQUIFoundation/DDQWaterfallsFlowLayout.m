@@ -5,7 +5,6 @@
 
 #import "DDQWaterfallsFlowLayout.h"
 
-
 @interface DDQWaterfallsFlowLayout ()
 
 @property (nonatomic, assign) UIEdgeInsets layout_margin;

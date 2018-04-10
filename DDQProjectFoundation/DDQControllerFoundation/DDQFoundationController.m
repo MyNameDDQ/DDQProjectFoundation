@@ -70,6 +70,8 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
         rightItem = [[UIBarButtonItem alloc] initWithCustomView:customButton];
     }
     
+    [customButton sizeToFit];
+    
     //设置rightItem
     NSMutableArray *itemArray = self.navigationItem.rightBarButtonItems.mutableCopy;
     if (!itemArray) {
@@ -109,6 +111,12 @@ DDQFoundationRequestFailureKey const DDQFoundationRequestFailureDesc = @"com.ddq
 
     UIButton *button = [self setRightBarButtonItemStyle:style Content:content];
     button.frame = frame;
+    [button addTarget:self action:sel forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void)foundation_setRightItemWithStyle:(DDQFoundationBarButtonStyle)style Content:(id)content Selector:(SEL)sel {
+    
+    UIButton *button = [self setRightBarButtonItemStyle:style Content:content];
     [button addTarget:self action:sel forControlEvents:UIControlEventTouchUpInside];
 }
 

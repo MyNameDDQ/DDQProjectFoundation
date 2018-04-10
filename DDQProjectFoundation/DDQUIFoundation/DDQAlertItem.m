@@ -21,6 +21,8 @@
     return [[self alloc] initItemWithStyle:style];
 }
 
+
+
 - (instancetype)initItemWithStyle:(DDQAlertItemStyle)style {
     
     self = [super initWithFrame:CGRectZero];

@@ -19,6 +19,14 @@
 @implementation DDQBaseCell
 
 const DDQSeparatorMargin DDQSeparatorMarginZero = {0, 0};
+@synthesize cell_model = _cell_model;
+
+DDQSeparatorMargin DDQSeparatorMarginMaker(CGFloat l, CGFloat r) {
+    
+    DDQSeparatorMargin margin = {l, r};
+    return margin;
+    
+}
 
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     
@@ -33,7 +41,7 @@ const DDQSeparatorMargin DDQSeparatorMarginZero = {0, 0};
     self.cell_separatorHeight = 0.5;
     
     //不能给ContentView add self为observer
-    //    [self addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew context:nil];
+//    [self addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew context:nil];
     return self;
 }
 
@@ -41,8 +49,11 @@ const DDQSeparatorMargin DDQSeparatorMarginZero = {0, 0};
     
     [super setFrame:frame];
     
+    //self的frame（主要是宽度，默认为320.0）发生变化以后需要重新计算子视图的大小
+    //不把布局写在layoutSubview里是因为在下执行方法中实现布局后更容易算取Cell高度。
     [self cell_updateContentSubviewsFrame];
     [self cell_setNeedsLayout];
+
 }
 
 + (BOOL)requiresConstraintBasedLayout {
@@ -55,15 +66,19 @@ const DDQSeparatorMargin DDQSeparatorMarginZero = {0, 0};
     [super layoutSubviews];
     
     _is_layoutSubviews = YES;
-    
-    //给计算过大小的视图布局
-    for (UIView *subView in self.contentView.subviews) {
+
+    if ([self.class cell_useBoundRectLayout]) {
         
-        if (!CGRectEqualToRect(subView.view_boundRect, CGRectZero)) subView.frame = subView.view_boundRect;
-        
-        for (UIView *sSubView in subView.subviews) {
+        //给计算过大小的视图布局
+        for (UIView *subView in self.contentView.subviews) {
             
-            if (!CGRectEqualToRect(sSubView.view_boundRect, CGRectZero)) sSubView.frame = sSubView.view_boundRect;
+            if (!CGRectEqualToRect(subView.view_boundRect, CGRectZero)) subView.frame = subView.view_boundRect;
+            
+            for (UIView *sSubView in subView.subviews) {
+                
+                if (!CGRectEqualToRect(sSubView.view_boundRect, CGRectZero)) sSubView.frame = sSubView.view_boundRect;
+                
+            }
         }
     }
     
@@ -83,6 +98,7 @@ const DDQSeparatorMargin DDQSeparatorMarginZero = {0, 0};
         
         self.topSeparatorView.frame = CGRectMake(separatorX, 0.0, separatorW, self.cell_separatorHeight);
         self.bottomSeparatorView.frame = CGRectMake(separatorX, self.contentView.height - self.cell_separatorHeight, separatorW, self.cell_separatorHeight);
+        
     }
 }
 
@@ -107,52 +123,66 @@ const DDQSeparatorMargin DDQSeparatorMarginZero = {0, 0};
     } else {
         
         [self.contentView view_configSubviews:@[self.bottomSeparatorView]];
+        
     }
     [self cell_setNeedsLayout];
+    
 }
 
 - (void)setCell_separatorColor:(UIColor *)cell_separatorColor {
     
     _cell_separatorColor = cell_separatorColor;
     self.topSeparatorView.backgroundColor = self.bottomSeparatorView.backgroundColor = _cell_separatorColor;
+    
 }
 
 - (void)setCell_separatorMargin:(DDQSeparatorMargin)cell_separatorMargin {
     
     _cell_separatorMargin = cell_separatorMargin;
     [self cell_setNeedsLayout];
+    
 }
 
 - (void)setCell_separatorHeight:(CGFloat)cell_separatorHeight {
     
     _cell_separatorHeight = cell_separatorHeight;
     [self cell_setNeedsLayout];
+    
 }
 
 - (DDQSeparatorMargin)cell_defaultMargin {
     
     DDQSeparatorMargin margin = {15.0 * self.cell_rateSet.widthRate, 0};
     return margin;
+    
 }
 
 - (void)cell_updateDataWithModel:(__kindof DDQBaseCellModel *)model {
     
     _cell_model = model;
+    
+    //当子视图内容被赋值以后需要再次重新计算
+    [self cell_updateContentSubviewsFrame];
+    [self cell_setNeedsLayout];
+    
 }
 
 + (CGFloat)cell_getCellHeightWithModel:(__kindof DDQBaseCellModel *)model {
     
     return (model.model_recordHeight > 1.0) ? model.model_recordHeight : 1.0;
+    
 }
 
 - (DDQRateSet)cell_rateSet {
     
     return [UIView view_getCurrentDeviceRateWithVersion:DDQFoundationRateDevice_iPhone6];
+    
 }
 
 - (BOOL)cell_layoutSubviews {
     
     return _is_layoutSubviews;
+    
 }
 
 - (void)cell_setNeedsLayout {
@@ -161,6 +191,7 @@ const DDQSeparatorMargin DDQSeparatorMarginZero = {0, 0};
     if (_is_layoutSubviews) {//如果未调用则不需要重新布局
         
         [self setNeedsLayout];
+        
     }
 }
 
@@ -169,6 +200,7 @@ const DDQSeparatorMargin DDQSeparatorMarginZero = {0, 0};
     self.topSeparatorView = [UIView viewChangeBackgroundColor:kSetColor(153.0, 153.0, 153.0, 1.0)];
     self.bottomSeparatorView = [UIView viewChangeBackgroundColor:kSetColor(153.0, 153.0, 153.0, 1.0)];
     _subviewsConfig = YES;
+    
 }
 
 - (void)cell_updateContentSubviewsFrame {}//SubClass implementation
@@ -183,5 +215,16 @@ const DDQSeparatorMargin DDQSeparatorMarginZero = {0, 0};
     return 15.0 * self.cell_widthRate;
 }
 
++ (BOOL)cell_useBoundRectLayout {
+    
+    return YES;
+    
+}
+
+- (BOOL)cell_subviewsConfig {
+    
+    return _subviewsConfig;
+    
+}
 
 @end

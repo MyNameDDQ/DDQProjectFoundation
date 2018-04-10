@@ -41,7 +41,7 @@ DDQButtonBeginSourceKey const DDQButtonBeginBackgroundColor = @"button.beginBack
     }
     
     self.enabled = NO;
-    [self setTitle:[NSString stringWithFormat:@"(%.0fs)重发", totalTime] forState:UIControlStateNormal];
+//    [self setTitle:[NSString stringWithFormat:@"(%.0fs)重发", totalTime] forState:UIControlStateNormal];
     [self setTitleColor:defaultTitleColor forState:UIControlStateNormal];
     
     __weak typeof(self) weakSelf = self;
@@ -49,18 +49,20 @@ DDQButtonBeginSourceKey const DDQButtonBeginBackgroundColor = @"button.beginBack
     dispatch_source_set_timer(timerSource, DISPATCH_TIME_NOW, interval * NSEC_PER_SEC, 0.0 * NSEC_PER_SEC);
     dispatch_source_set_event_handler(timerSource, ^{
         
+        __strong typeof(self) strongSelf = weakSelf;
+
         totalTime --;
         //秒数判断
         if (totalTime <= 0.0) {//总时间计时完毕
             
-            weakSelf.enabled = YES;
+            strongSelf.enabled = YES;
             dispatch_suspend(timerSource);
             if (completion) {
                 completion(YES, beginSourceDic);
             }
         } else {//倒计时未完成
-            
-            [weakSelf setTitle:[NSString stringWithFormat:@"(%.0fs)重发", totalTime] forState:UIControlStateNormal];
+        
+            [strongSelf setTitle:[NSString stringWithFormat:@"(%.0fs)重发", totalTime] forState:UIControlStateNormal];
             if (completion) {
                 completion(NO, nil);
             }

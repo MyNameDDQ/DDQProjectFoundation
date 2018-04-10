@@ -29,6 +29,8 @@
 
 #define DDQWeakObject(objc)  __weak typeof(objc) weakObjc = objc
 
+#define DDQStrongObject(objc)  __strong typeof(objc) strongObjc = objc
+
 #define DDQ_DEPRECATED(_available, _deprecated, ...)  NS_DEPRECATED_IOS(_available, _deprecated, __VA_ARGS__)
 
 #define DDQ_DEPRECATED_V(_available, _deprecated, __VA_ARGS__) NS_DEPRECATED_IOS(_available, _deprecated, __VA_ARGS__)
@@ -48,5 +50,9 @@
 
 #define DDQ_DEFAULT_SOURCE_FILEPATH(fileName, extension) [DDQ_DEFAULT_SOURCE_PATH \
 pathForResource:fileName ofType:extension]
+
+#if __has_attribute(objc_designated_initializer)
+#define DDQ_DESIGNATED_INITIALIZER __attribute__((objc_designated_initializer))
+#endif
 
 #endif /* DDQFoundationDefine_h */
