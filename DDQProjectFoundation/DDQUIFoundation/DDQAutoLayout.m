@@ -230,37 +230,37 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
             
         case DDQLayoutOriginTypeTop:{
             
-            CGFloat y = [attribute.layoutView isEqual:self.targetView.superview] ? 0.0 : attribute.topConstraint;
-            targetOrigin.y = y + constraint;
+            targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
+            targetOrigin.y += constraint;
             
         }break;
             
         case DDQLayoutOriginTypeLeading:{
             
-            CGFloat x = ([attribute.layoutView isEqual:self.targetView.superview]) ? 0.0 : attribute.leadingConstraint;
-            targetOrigin.x = x + constraint;
-            
+            targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
+            targetOrigin.x += constraint;
+
         } break;
 
         case DDQLayoutOriginTypeTrailing:{
             
-            CGFloat x = ([attribute.layoutView isEqual:self.targetView.superview]) ? attribute.layoutView.width : attribute.trailingConstraint;
-            targetOrigin.x = x - constraint;
+            targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
+            targetOrigin.x -= constraint;
             self.layoutHorDirection = DDQLayoutDirectionRTL;
             
         } break;
             
         case DDQLayoutOriginTypeBottom:{
             
-            CGFloat y = ([attribute.layoutView isEqual:self.targetView.superview]) ? attribute.layoutView.height : attribute.bottomConstraint;
-            targetOrigin.y = y - constraint;
+            targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
+            targetOrigin.y -= constraint;
             self.layoutVerDirection = DDQLayoutDirectionBTT;
             
         } break;
             
         case DDQLayoutOriginTypeCenter:{
             
-            targetOrigin = ([attribute.layoutView isEqual:self.targetView.superview]) ? attribute.layoutView.center : attribute.centerPoint;
+            targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
             self.layoutVerDirection = DDQLayoutDirectionCenter;
             self.layoutHorDirection = DDQLayoutDirectionCenter;
             
@@ -268,16 +268,16 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
             
         case DDQLayoutOriginTypeCenterX:{
             
-            CGFloat x = ([attribute.layoutView isEqual:self.targetView.superview]) ? attribute.layoutView.boundsMidX : attribute.centerXConstraint;
-            targetOrigin.x = x + constraint;
+            targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
+            targetOrigin.x += constraint;
             self.layoutHorDirection = DDQLayoutDirectionCenterX;
             
         } break;
             
         case DDQLayoutOriginTypeCenterY:{
             
-            CGFloat y = ([attribute.layoutView isEqual:self.targetView.superview]) ? attribute.layoutView.boundsMidY : attribute.centerYConstraint;
-            targetOrigin.y = y + constraint;
+            targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
+            targetOrigin.y += constraint;
             self.layoutVerDirection = DDQLayoutDirectionCenterY;
             
         } break;
@@ -286,9 +286,51 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
             break;
             
     }
-    
     targetFrame.origin = targetOrigin;
     self.targetView.frame = targetFrame;
+    
+}
+
+/**
+ 根据不同的布局属性样式重新确定起始坐标
+
+ @param attribute 自定义布局属性
+ @return 新的起始坐标
+ */
+- (CGPoint)layout_handleViewOriginWithAttribute:(DDQLayoutAttribute *)attribute {
+    
+    CGPoint newPoint = self.targetView.frame.origin;
+    DDQLayoutAttributeStyle style = attribute.layoutStyle;
+    if (style == DDQLayoutAttributeStyleLeading) {
+        
+        newPoint.x = (attribute.layoutView == self.targetView.superview) ? 0.0 : attribute.layoutView.x;
+        
+    } else if (style == DDQLayoutAttributeStyleTrailing) {
+        
+        newPoint.x = (attribute.layoutView == self.targetView.superview) ? attribute.layoutView.width : attribute.layoutView.frameMaxX;
+        
+    } else if (style == DDQLayoutAttributeStyleCenterX) {
+        
+        newPoint.x = (attribute.layoutView == self.targetView.superview) ? attribute.layoutView.boundsMidX : attribute.layoutView.frameMidX;
+        
+    } else if (style == DDQLayoutAttributeStyleTop) {
+        
+        newPoint.y = (attribute.layoutView == self.targetView.superview) ? 0.0 : attribute.layoutView.y;
+        
+    } else if (style == DDQLayoutAttributeStyleBottom) {
+        
+        newPoint.y = (attribute.layoutView == self.targetView.superview) ? attribute.layoutView.height : attribute.layoutView.frameMaxY;
+        
+    } else if (style == DDQLayoutAttributeStyleCenterY) {
+        
+        newPoint.y = (attribute.layoutView == self.targetView.superview) ? attribute.layoutView.boundsMidY : attribute.layoutView.frameMidY;
+        
+    } else if (style == DDQLayoutAttributeStyleCenter) {
+        
+        newPoint = (attribute.layoutView == self.targetView.superview) ? CGPointMake(attribute.layoutView.boundsMidX, attribute.layoutView.boundsMidY) : attribute.layoutView.center;
+        
+    }
+    return newPoint;
     
 }
 

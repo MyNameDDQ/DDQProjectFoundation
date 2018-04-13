@@ -8,12 +8,14 @@
 
 @interface UIView (DDQViewLayout)
 
-- (DDQLayoutAttribute *)layout_leading;
-- (DDQLayoutAttribute *)layout_trailing;
-- (DDQLayoutAttribute *)layout_top;
-- (DDQLayoutAttribute *)layout_bottom;
-- (DDQLayoutAttribute *)layout_centerX;
-- (DDQLayoutAttribute *)layout_centerY;
-- (DDQLayoutAttribute *)layout_center;
+- (DDQLayoutAttribute *)leading;
+- (DDQLayoutAttribute *)trailing;
+- (DDQLayoutAttribute *)top;
+- (DDQLayoutAttribute *)bottom;
+- (DDQLayoutAttribute *)centerX;
+- (DDQLayoutAttribute *)centerY;
+- (DDQLayoutAttribute *)centerPoint;
+
+
 
 @end

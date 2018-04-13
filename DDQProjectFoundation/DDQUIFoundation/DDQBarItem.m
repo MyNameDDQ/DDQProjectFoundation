@@ -145,8 +145,9 @@
     
     _item_selected = selected;
     
-    self.item_imageView.image = (selected) ?  self.item_selectedImage : self.item_normalImage;
-    self.item_titleLabel.textColor = (selected) ? self.item_selectedTitleColor : self.item_normalTitleColor;
+    self.item_imageView.image = (selected) ?  (self.item_selectedImage) ? self.item_selectedImage : self.item_normalImage : self.item_normalImage;
+    self.item_titleLabel.textColor = (selected) ? (self.item_selectedTitleColor) ? self.item_selectedTitleColor : self.item_normalTitleColor : self.item_normalTitleColor;
+    
 }
 
 @end
