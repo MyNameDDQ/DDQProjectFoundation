@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param frame 视图大小
  */
-- (instancetype)initViewWithFrame:(CGRect)frame NS_DESIGNATED_INITIALIZER;
+- (instancetype)initViewWithFrame:(CGRect)frame DDQ_DESIGNATED_INITIALIZER;
 
 /** 是否已经布局过 */
 @property (nonatomic, readonly) BOOL view_layoutSubviews;

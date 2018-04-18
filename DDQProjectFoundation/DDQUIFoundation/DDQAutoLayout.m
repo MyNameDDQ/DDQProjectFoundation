@@ -156,8 +156,8 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
         
         CGRect targetFrame = self.targetView.frame;
         targetFrame.size.width = width;
-        self.targetView.frame = targetFrame;
-        
+        [self layout_handleViewFrameWithNewSize:targetFrame.size];
+
     };
 }
 
@@ -167,8 +167,8 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
       
         CGRect targetFrame = self.targetView.frame;
         targetFrame.size.height = height;
-        self.targetView.frame = targetFrame;
-    
+        [self layout_handleViewFrameWithNewSize:targetFrame.size];
+
     };
 }
 
@@ -185,12 +185,15 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
     
     return ^void (CGSize size) {
         
-        if ([self.targetView.class isSubclassOfClass:[UILabel class]]) {
+        CGSize boundSize = [self.targetView sizeThatFits:size];
+        
+        if (boundSize.height > size.height) {
             
-            CGSize boundSize = [(UILabel *)self.targetView label_boundWithMaxSize:size attributes:nil];
-            [self layout_handleViewFrameWithNewSize:boundSize];
+            boundSize.height = size.height;
             
         }
+        [self layout_handleViewFrameWithNewSize:boundSize];
+            
     };
 }
 

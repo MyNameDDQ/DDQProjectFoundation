@@ -82,6 +82,8 @@ DDQSeparatorMargin DDQSeparatorMarginMaker(CGFloat l, CGFloat r) {
         }
     }
     
+    [self cell_updateContentSubviewsFrame];
+    
     if (self.cell_separatorStyle == DDQTableViewCellSeparatorStyleNone) return;
     
     CGFloat separatorX = self.cell_separatorMargin.leftMargin;

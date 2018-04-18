@@ -74,6 +74,8 @@
             }
         }
     }
+    [self view_updateContentSubviewsFrame];
+
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {

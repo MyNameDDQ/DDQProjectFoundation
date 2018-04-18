@@ -300,7 +300,7 @@ static const char *BoundRect = "Bound.Rect";
     } else {
         sizeAttrs = @{NSFontAttributeName:[UIFont systemFontOfSize:self.font.pointSize + 0.5]};
     }
-    
+
     CGSize boundSize = [self.text boundingRectWithSize:mSize options:NSStringDrawingUsesLineFragmentOrigin attributes:sizeAttrs context:nil].size;
     return CGSizeMake(ceil(boundSize.width), ceil(boundSize.height));
     

@@ -35,7 +35,7 @@ typedef void(^DDQAutoLayoutFitViewScaleSize)(CGFloat scale);
  */
 @interface DDQAutoLayout : NSObject
 
-- (instancetype)initLayoutWithView:(nullable __kindof UIView *)view NS_DESIGNATED_INITIALIZER;
+- (instancetype)initLayoutWithView:(nullable __kindof UIView *)view DDQ_DESIGNATED_INITIALIZER;
 
 @property (nonatomic, readonly) DDQAutoLayoutLeading ddq_leading;
 @property (nonatomic, readonly) DDQAutoLayoutTrailing ddq_trailing;
