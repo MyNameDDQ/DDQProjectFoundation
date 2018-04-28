@@ -244,7 +244,7 @@ static const char *BoundRect = "Bound.Rect";
     if (currentVersion >= DDQFoundationRateDevice_iPhone6) {//iPhone6及以上屏幕大小不变
         pointSize = defaultSize;
     } else {
-        pointSize = ceil((defaultSize * 2.0 * rateSet.widthRate) * 0.5);
+        pointSize = ceil(defaultSize * rateSet.widthRate);
     }
     return [UIFont systemFontOfSize:pointSize];
 }

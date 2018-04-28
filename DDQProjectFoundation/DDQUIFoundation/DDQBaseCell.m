@@ -9,6 +9,7 @@
     
     BOOL _is_layoutSubviews;
     BOOL _subviewsConfig;
+    CGRect _originFrame;
 }
 
 @property (nonatomic, strong) UIView *topSeparatorView;
@@ -35,11 +36,11 @@ DDQSeparatorMargin DDQSeparatorMarginMaker(CGFloat l, CGFloat r) {
     
     self.selectionStyle = UITableViewCellSelectionStyleNone;
     
-    [self cell_contentViewSubviewsConfig];
     self.cell_separatorStyle = DDQTableViewCellSeparatorStyleNone;
     self.cell_separatorMargin = DDQSeparatorMarginZero;
     self.cell_separatorHeight = 0.5;
-    
+    [self cell_contentViewSubviewsConfig];
+
     //不能给ContentView add self为observer
 //    [self addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew context:nil];
     return self;
@@ -48,12 +49,16 @@ DDQSeparatorMargin DDQSeparatorMarginMaker(CGFloat l, CGFloat r) {
 - (void)setFrame:(CGRect)frame {
     
     [super setFrame:frame];
-    
-    //self的frame（主要是宽度，默认为320.0）发生变化以后需要重新计算子视图的大小
-    //不把布局写在layoutSubview里是因为在下执行方法中实现布局后更容易算取Cell高度。
-    [self cell_updateContentSubviewsFrame];
-    [self cell_setNeedsLayout];
 
+    if (self.cell_subviewsConfig && !CGRectEqualToRect(_originFrame, self.frame)) {
+    
+        //self的frame（主要是宽度，默认为320.0）发生变化以后需要重新计算子视图的大小
+        //不把布局写在layoutSubview里是因为在下执行方法中实现布局后更容易算取Cell高度。
+        [self cell_updateContentSubviewsFrame];
+
+    }
+    _originFrame = frame;
+    
 }
 
 + (BOOL)requiresConstraintBasedLayout {
@@ -82,7 +87,11 @@ DDQSeparatorMargin DDQSeparatorMarginMaker(CGFloat l, CGFloat r) {
         }
     }
     
-    [self cell_updateContentSubviewsFrame];
+    if ([self.class cell_needUpdateSubviewFrameWhenLayoutSubviews]) {
+        
+        [self cell_updateContentSubviewsFrame];
+
+    }
     
     if (self.cell_separatorStyle == DDQTableViewCellSeparatorStyleNone) return;
     
@@ -165,7 +174,7 @@ DDQSeparatorMargin DDQSeparatorMarginMaker(CGFloat l, CGFloat r) {
     
     //当子视图内容被赋值以后需要再次重新计算
     [self cell_updateContentSubviewsFrame];
-    [self cell_setNeedsLayout];
+//    [self cell_setNeedsLayout];
     
 }
 
@@ -220,6 +229,12 @@ DDQSeparatorMargin DDQSeparatorMarginMaker(CGFloat l, CGFloat r) {
 + (BOOL)cell_useBoundRectLayout {
     
     return YES;
+    
+}
+
++ (BOOL)cell_needUpdateSubviewFrameWhenLayoutSubviews {
+    
+    return NO;
     
 }
 

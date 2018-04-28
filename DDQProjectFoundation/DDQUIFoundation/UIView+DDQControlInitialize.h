@@ -64,7 +64,7 @@ UIKIT_EXTERN DDQViewVHMargin DDQViewVHMarginMaker(CGFloat v, CGFloat h);
 /**
  储存计算过的frame大小
  */
-@property (nonatomic, assign) CGRect view_boundRect;//default CGRectZero
+@property (nonatomic, assign) CGRect view_boundRect DDQ_DEPRECATED(2_0, 2_0, "别用这个属性了");//default CGRectZero
 
 /**
  View是否完成过动画

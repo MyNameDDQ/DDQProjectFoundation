@@ -72,6 +72,12 @@ UIKIT_EXTERN DDQSeparatorMargin DDQSeparatorMarginMaker(CGFloat l, CGFloat r);
 + (BOOL)cell_useBoundRectLayout;//default YES
 
 /**
+ 是否在layoutSubview方法中更新subview的frame
+ 理由同DDQBaseView
+ */
++ (BOOL)cell_needUpdateSubviewFrameWhenLayoutSubviews;//default NO
+
+/**
  当前Cell上显示数据的Model
  PS:当cell_updateDataWithModel被调用后有值
  */

@@ -55,6 +55,13 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)view_useBoundRectLayout;//default YES
 
 /**
+ 是否在layoutSubview方法中更新subview的frame
+ 会有这么一个情况。当视图做frame动画时，视图的size在动画完成之前都是zero，在动画完成之后size恢复正常，此时并不会setFrame而是调用layoutSubview。
+ 一般情况下视图在setFrame中更新subview的frame即可。
+ */
++ (BOOL)view_needUpdateSubviewFrameWhenLayoutSubviews;//default NO
+
+/**
  基础TableView
  没有调取view_tableViewConfig时为空
  */

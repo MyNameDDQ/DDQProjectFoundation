@@ -17,5 +17,4 @@
 - (DDQLayoutAttribute *)centerPoint;
 
 
-
 @end

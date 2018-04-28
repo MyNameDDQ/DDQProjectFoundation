@@ -10,6 +10,8 @@
     
     BOOL _is_layoutSubviews;
     BOOL _is_config;
+    CGRect _originFrame;
+    
 }
 
 @end
@@ -19,13 +21,16 @@
 - (instancetype)initViewWithFrame:(CGRect)frame {
     
     self = [super initWithFrame:frame];
-    if (!self) return nil;
-    
-    self.view_autoLayout = YES;
     _is_layoutSubviews = NO;
+    _is_config = NO;
+
+    self.view_autoLayout = YES;
     self.backgroundColor = [UIColor clearColor];
     [self view_subviewsConfig];
+    [self view_updateContentSubviewsFrame];
+
     return self;
+    
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -43,15 +48,20 @@
 + (BOOL)requiresConstraintBasedLayout {
     
     return YES;
+    
 }
 
 - (void)setFrame:(CGRect)frame {
     
     [super setFrame:frame];
-    
-    [self view_updateContentSubviewsFrame];
-    [self view_setNeedsLayout];
-    
+
+    if (self.view_isConfig && !CGRectEqualToRect(_originFrame, self.frame)) {
+        
+        [self view_updateContentSubviewsFrame];
+        
+    }
+    _originFrame = frame;
+
 }
 
 - (void)layoutSubviews {
@@ -74,8 +84,12 @@
             }
         }
     }
-    [self view_updateContentSubviewsFrame];
+    
+    if ([self.class view_needUpdateSubviewFrameWhenLayoutSubviews]) {
+        
+        [self view_updateContentSubviewsFrame];
 
+    }
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -152,6 +166,12 @@
 + (BOOL)view_useBoundRectLayout {
     
     return YES;
+    
+}
+
++ (BOOL)view_needUpdateSubviewFrameWhenLayoutSubviews {
+    
+    return NO;
     
 }
 

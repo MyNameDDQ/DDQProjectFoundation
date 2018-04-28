@@ -29,6 +29,7 @@ typedef void(^DDQAutoLayoutEstimateSize)(CGSize size);
 typedef void(^DDQAutoLayoutFitViewSize)(void);
 typedef void(^DDQAutoLayoutFitViewScaleSize)(CGFloat scale);
 
+UIKIT_EXTERN DDQAutoLayout *autoLayout(__kindof UIView *_Nullable view);
 
 /**
  自定义布局
@@ -52,6 +53,25 @@ typedef void(^DDQAutoLayoutFitViewScaleSize)(CGFloat scale);
 @property (nonatomic, readonly) DDQAutoLayoutEstimateSize ddq_estimateSize;
 @property (nonatomic, readonly) DDQAutoLayoutFitViewSize ddq_fitSize;
 @property (nonatomic, readonly) DDQAutoLayoutFitViewScaleSize ddq_fitScaleSize;
+
+@end
+
+typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
+    
+    DDQLayoutDirectionLTR,          //从左到右
+    DDQLayoutDirectionRTL,          //从右到左
+    DDQLayoutDirectionTTB,          //从上到下
+    DDQLayoutDirectionBTT,          //从下到上
+    DDQLayoutDirectionCenter,
+    DDQLayoutDirectionCenterX,
+    DDQLayoutDirectionCenterY,
+    
+};
+
+@interface UIView (DDQViewLayoutDirection)
+
+@property (nonatomic, assign) DDQLayoutDirection horDirection;
+@property (nonatomic, assign) DDQLayoutDirection verDirection;
 
 @end
 

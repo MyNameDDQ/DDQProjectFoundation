@@ -5,6 +5,8 @@
 
 #import "DDQAutoLayout.h"
 
+#import <objc/runtime.h>
+
 typedef NS_ENUM(NSUInteger, DDQLayoutOriginType) {
     
     DDQLayoutOriginTypeTop,
@@ -17,37 +19,26 @@ typedef NS_ENUM(NSUInteger, DDQLayoutOriginType) {
     
 };
 
-typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
-    
-    DDQLayoutDirectionLTR,          //从左到右
-    DDQLayoutDirectionRTL,          //从右到左
-    DDQLayoutDirectionTTB,          //从上到下
-    DDQLayoutDirectionBTT,          //从下到上
-    DDQLayoutDirectionCenter,
-    DDQLayoutDirectionCenterX,
-    DDQLayoutDirectionCenterY,
-    
-};
-
 @interface DDQAutoLayout ()
 
 @property (nonatomic, strong) UIView *targetView;
-@property (nonatomic, assign) DDQLayoutDirection layoutVerDirection;
-@property (nonatomic, assign) DDQLayoutDirection layoutHorDirection;
 @property (nonatomic, assign) DDQLayoutOriginType layoutOriginType;
 
 @end
 
 @implementation DDQAutoLayout
 
+DDQAutoLayout *autoLayout(__kindof UIView *_Nullable view) {
+    
+    return [[DDQAutoLayout alloc] initLayoutWithView:view];
+    
+}
+
 - (instancetype)initLayoutWithView:(__kindof UIView *)view {
     
     self = [super init];
     
     self.targetView = view;
-    
-    self.layoutHorDirection = DDQLayoutDirectionLTR;
-    self.layoutVerDirection = DDQLayoutDirectionTTB;
     
     return self;
     
@@ -235,6 +226,7 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
             
             targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
             targetOrigin.y += constraint;
+            self.targetView.verDirection = DDQLayoutDirectionTTB;
             
         }break;
             
@@ -242,6 +234,7 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
             
             targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
             targetOrigin.x += constraint;
+            self.targetView.horDirection = DDQLayoutDirectionLTR;
 
         } break;
 
@@ -249,23 +242,23 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
             
             targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
             targetOrigin.x -= constraint;
-            self.layoutHorDirection = DDQLayoutDirectionRTL;
-            
+            self.targetView.horDirection = DDQLayoutDirectionRTL;
+
         } break;
             
         case DDQLayoutOriginTypeBottom:{
             
             targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
             targetOrigin.y -= constraint;
-            self.layoutVerDirection = DDQLayoutDirectionBTT;
-            
+            self.targetView.verDirection = DDQLayoutDirectionBTT;
+
         } break;
             
         case DDQLayoutOriginTypeCenter:{
             
             targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
-            self.layoutVerDirection = DDQLayoutDirectionCenter;
-            self.layoutHorDirection = DDQLayoutDirectionCenter;
+            self.targetView.verDirection = DDQLayoutDirectionCenter;
+            self.targetView.horDirection = DDQLayoutDirectionCenter;
             
         } break;
             
@@ -273,16 +266,16 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
             
             targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
             targetOrigin.x += constraint;
-            self.layoutHorDirection = DDQLayoutDirectionCenterX;
-            
+            self.targetView.horDirection = DDQLayoutDirectionCenterX;
+
         } break;
             
         case DDQLayoutOriginTypeCenterY:{
             
             targetOrigin = [self layout_handleViewOriginWithAttribute:attribute];
             targetOrigin.y += constraint;
-            self.layoutVerDirection = DDQLayoutDirectionCenterY;
-            
+            self.targetView.verDirection = DDQLayoutDirectionCenterY;
+
         } break;
 
         default:
@@ -362,7 +355,7 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
     
     CGRect targetFrame = self.targetView.frame;
     CGPoint targetOrigin = targetFrame.origin;
-    switch (self.layoutHorDirection) {
+    switch (self.targetView.horDirection) {
             
         case DDQLayoutDirectionRTL:
             
@@ -388,7 +381,7 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
             
     }
     
-    switch (self.layoutVerDirection) {
+    switch (self.targetView.verDirection) {
         
         case DDQLayoutDirectionBTT:
             
@@ -415,5 +408,37 @@ typedef NS_ENUM(NSUInteger, DDQLayoutDirection) {
     return targetOrigin;
     
 }
+
+@end
+
+@implementation UIView (DDQViewLayoutDirection)
+
+static const char *HorDirection = "Horizontal";
+static const char *VerDirection = "Vertical";
+
+- (void)setHorDirection:(DDQLayoutDirection)horDirection {
+    
+    objc_setAssociatedObject(self, HorDirection, @(horDirection), OBJC_ASSOCIATION_RETAIN);
+    
+}
+
+- (DDQLayoutDirection)horDirection {
+    
+    return [objc_getAssociatedObject(self, HorDirection) integerValue];
+    
+}
+
+- (void)setVerDirection:(DDQLayoutDirection)verDirection {
+    
+    objc_setAssociatedObject(self, VerDirection, @(verDirection), OBJC_ASSOCIATION_RETAIN);
+    
+}
+
+- (DDQLayoutDirection)verDirection {
+    
+    return [objc_getAssociatedObject(self, VerDirection) integerValue];
+    
+}
+
 
 @end
